@@ -1,23 +1,8 @@
 # Default Theme - Clean and Professional
 # A clean, modern theme with visible path and git information
 
-# Symbols
-WINUXSH_PROMPT_SYMBOL="$WINUXSH_SYMBOL_ARROW"
-
-# Left prompt
-# Format: user@host dir (git) →
-PROMPT="${WINUXSH_COLOR_BOLD_CYAN}%n${WINUXSH_COLOR_RESET}@${WINUXSH_COLOR_BOLD_GREEN}%m${WINUXSH_COLOR_RESET} ${WINUXSH_COLOR_BOLD_BLUE}%~${WINUXSH_COLOR_RESET} \$(winuxsh_prompt_git)${WINUXSH_COLOR_BOLD_MAGENTA} ${WINUXSH_PROMPT_SYMBOL}${WINUXSH_COLOR_RESET} "
+# Left prompt with colors
+PROMPT="%F{green}%n@%m%f %F{blue}%~%f %# "
 
 # Right prompt - show time and exit code
-RPROMPT="${WINUXSH_COLOR_BOLD_YELLOW}%T${WINUXSH_COLOR_RESET} ${WINUXSH_COLOR_RED}%(?..✘ %?)${WINUXSH_COLOR_RESET}"
-
-# Git prompt info
-function winuxsh_prompt_git() {
-    if winuxsh_is_git; then
-        local branch=$(winuxsh_git_branch)
-        local status=$(winuxsh_git_status)
-        local git_info="${WINUXSH_COLOR_YELLOW}${WINUXSH_SYMBOL_GIT} ${branch}"
-        [ -n "$status" ] && git_info="${git_info} ${WINUXSH_COLOR_BOLD_RED}[${status}]"
-        echo "${git_info}${WINUXSH_COLOR_RESET}"
-    fi
-}
+RPROMPT="%F{yellow}%T%f %F{red}%(?..✘ %?)%f"

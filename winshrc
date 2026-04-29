@@ -1,42 +1,16 @@
 # Oh My Winuxsh!
-#
-# A framework for managing your WinSH shell configuration.
-# Includes themes, plugins, and prompt customization.
-#
-# Repository: https://github.com/caomengxuan666/oh-my-winuxsh
-# License: MIT
+# Simplified config for WinSH loader
 
-# --- Core Setup ---
-export WINUXSH="$HOME/.oh-my-winuxsh"
+# Core setup
+WINUXSH="$HOME/.oh-my-winuxsh"
+WINUXSH_THEME="default"
 
-# Load core library
-if [ -f "$WINUXSH/lib/core.winsh" ]; then
-    source "$WINUXSH/lib/core.winsh"
-fi
+# Load core library (colors, symbols, helpers)
+source "$HOME/.oh-my-winuxsh/lib/core.winsh"
 
 # Load theme
-if [ -z "$WINUXSH_THEME" ]; then
-    WINUXSH_THEME="default"
-fi
-
-if [ -f "$WINUXSH/themes/${WINUXSH_THEME}.theme.winsh" ]; then
-    source "$WINUXSH/themes/${WINUXSH_THEME}.theme.winsh"
-fi
+source "$HOME/.oh-my-winuxsh/themes/$WINUXSH_THEME.theme.winsh"
 
 # Load plugins
-plugins=(
-    git
-    completion
-)
-
-for plugin in "${plugins[@]}"; do
-    if [ -f "$WINUXSH/plugins/${plugin}.plugin.winsh" ]; then
-        source "$WINUXSH/plugins/${plugin}.plugin.winsh"
-    fi
-done
-
-# --- Welcome Message ---
-echo "Oh My Winuxsh! v1.0.0"
-echo "  Theme:  $WINUXSH_THEME"
-echo "  Plugins: ${plugins[*]}"
-echo ""
+source "$HOME/.oh-my-winuxsh/plugins/git.plugin.winsh"
+source "$HOME/.oh-my-winuxsh/plugins/completion.plugin.winsh"
