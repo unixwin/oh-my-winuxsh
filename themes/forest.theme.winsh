@@ -1,0 +1,18 @@
+# Forest Theme - Natural Greens
+# Earth tones for nature lovers
+
+SYMBOL_LEAF="🍃"
+SYMBOL_TREE="🌲"
+SYMBOL_PROMPT="↳"
+
+PROMPT="${WINUXSH_COLOR_BOLD_GREEN}${SYMBOL_TREE} ${WINUXSH_COLOR_YELLOW}%~${WINUXSH_COLOR_RESET} \$(winuxsh_forest_git)
+${WINUXSH_COLOR_BOLD_GREEN}${SYMBOL_PROMPT}${WINUXSH_COLOR_RESET} "
+
+RPROMPT="${WINUXSH_COLOR_GREEN}%T${WINUXSH_COLOR_RESET}"
+
+function winuxsh_forest_git() {
+    if winuxsh_is_git; then
+        local branch=$(winuxsh_git_branch)
+        echo "${WINUXSH_COLOR_BOLD_GREEN}${SYMBOL_LEAF} ${branch}${WINUXSH_COLOR_RESET}"
+    fi
+}

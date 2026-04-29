@@ -1,0 +1,38 @@
+# Completion Plugin for Oh My Winuxsh
+# Enhances tab completion with additional contexts
+
+# --- Git Completions ---
+function _git_completion() {
+    local cmds="add bisect branch checkout clone commit diff fetch grep init log merge mv pull push rebase reset restore revert rm show stash status switch tag"
+    echo "$cmds"
+}
+
+# --- SSH Hostname Completions ---
+function _ssh_hosts() {
+    if [ -f "$HOME/.ssh/config" ]; then
+        grep -E "^Host " "$HOME/.ssh/config" 2>/dev/null | sed 's/Host //g' | tr ' ' '\n' | sort -u
+    fi
+    if [ -f "$HOME/.ssh/known_hosts" ]; then
+        cut -d ' ' -f 1 "$HOME/.ssh/known_hosts" 2>/dev/null | cut -d ',' -f 1 | sort -u
+    fi
+}
+
+# --- Docker Completions ---
+function _docker_commands() {
+    echo "attach build commit cp create diff events exec export history images import info inspect kill load login logout logs pause port ps pull push rename restart rm rmi run save search start stats stop tag top unpause update version wait"
+}
+
+# --- Cargo Completions (Rust) ---
+function _cargo_commands() {
+    echo "build check clean doc new init run test bench update publish add remove fmt clippy"
+}
+
+# --- NPM/Yarn Completions ---
+function _npm_commands() {
+    echo "install uninstall update run start test build publish init"
+}
+
+# --- Common Option Completions ---
+function _common_options() {
+    echo "--help --version -h -v -q -f -r --force --recursive"
+}

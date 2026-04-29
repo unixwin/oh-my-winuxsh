@@ -1,0 +1,24 @@
+# Cyberpunk Theme - Neon and Dark
+# A futuristic theme with neon colors and dark background aesthetics
+
+# Style settings
+setopt prompt_subst
+
+# Symbols
+CYBER_SYMBOL="⚡"
+CYBER_ARROW="▶"
+CYBER_DIAMOND="◆"
+
+# Left prompt - Neon style
+PROMPT="${WINUXSH_COLOR_BOLD_MAGENTA}┌──${CYBER_DIAMOND} ${WINUXSH_COLOR_BOLD_CYAN}%n${WINUXSH_COLOR_RESET}${WINUXSH_COLOR_BOLD_BLUE}@${WINUXSH_COLOR_RESET}${WINUXSH_COLOR_BOLD_GREEN}%m${WINUXSH_COLOR_RESET} ${WINUXSH_COLOR_YELLOW}[%~]${WINUXSH_COLOR_RESET}
+${WINUXSH_COLOR_BOLD_MAGENTA}└─${CYBER_ARROW}${WINUXSH_COLOR_RESET} "
+
+# Right prompt
+RPROMPT="${WINUXSH_COLOR_BOLD_RED}\$(winuxsh_cyber_git)${WINUXSH_COLOR_RESET} ${WINUXSH_COLOR_MAGENTA}%T${WINUXSH_COLOR_RESET}"
+
+function winuxsh_cyber_git() {
+    if winuxsh_is_git; then
+        local branch=$(winuxsh_git_branch)
+        echo "${CYBER_SYMBOL} ${branch}"
+    fi
+}
