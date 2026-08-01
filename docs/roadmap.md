@@ -183,7 +183,7 @@ Current branch progress:
   validate bundle API, `min_winuxsh`, manifests/API, and roll back by
   switching the lock file.
 - `bundle.toml` now declares `api = "winuxsh:plugin-bundle@0.1.0"`
-  and `min_winuxsh = "0.8.3"`; the validator treats both as release
+  and `min_winuxsh = "0.9.4"`; the validator treats both as release
   metadata.
 - The paired Winuxsh branch validates bundle-level API and refuses updates
   whose `min_winuxsh` is newer than the running host.

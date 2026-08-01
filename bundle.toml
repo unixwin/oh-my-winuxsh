@@ -1,8 +1,8 @@
 name = "oh-my-winuxsh"
-version = "1.0.0"
+version = "1.0.1"
 publisher = "unixwin"
 api = "winuxsh:plugin-bundle@0.1.0"
-min_winuxsh = "0.8.3"
+min_winuxsh = "0.9.4"
 channel = "stable"
 summary = "Official bundled plugin distribution for Winuxsh."
 

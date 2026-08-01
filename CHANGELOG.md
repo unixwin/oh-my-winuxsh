@@ -4,6 +4,35 @@ All notable changes to the official oh-my-winuxsh bundle are recorded here.
 Release entries describe bundle artifacts, host compatibility, permission
 changes, and user-visible asset changes.
 
+## 1.0.1 - 2026-08-02
+
+### Changed
+
+- Released first-party `.winux` source packs for Git, Docker, kubectl, npm,
+  zoxide, direnv, dotenv, fzf, last-working-dir, and thefuck against the
+  Winuxsh source lifecycle host.
+- Kept prompts, keybindings, themes, and command-not-found as host-consumed
+  builtin/declarative packs rather than pretending they are source scripts.
+- Updated bundle metadata with `api = "winuxsh:plugin-bundle@0.1.0"` and
+  `min_winuxsh = "0.9.4"` so older Winuxsh hosts refuse this source-pack bundle.
+- Added deterministic release packaging for `oh-my-winuxsh-1.0.1.zip` and the
+  matching `.sha256` checksum file.
+
+### Compatibility
+
+- Requires Winuxsh 0.9.4 or newer for source plugin startup and lifecycle hook
+  loading through `.winux` files.
+- Keeps process and WASM plugin protocols unchanged; WASM provider/effect APIs
+  remain future host work.
+
+### Release Checklist
+
+- Attach `oh-my-winuxsh-1.0.1.zip` and
+  `oh-my-winuxsh-1.0.1.zip.sha256` to the GitHub release.
+- Include this changelog entry and `docs/compatibility.md` in the release notes.
+- Run `python tools/validate_bundle.py` and
+  `python tools/package_bundle.py --check` before publishing.
+
 ## 1.0.0 - 2026-07-31
 
 ### Added
