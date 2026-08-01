@@ -1,0 +1,25 @@
+name = "process-echo"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "process"
+api = "winuxsh:plugin@0.1.0"
+category = "workflow"
+summary = "Process plugin host contract fixture."
+default = false
+permissions = ["cwd:read", "process:run:winuxsh-process-echo"]
+required_binaries = ["winuxsh-process-echo"]
+
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = []
+commands = ["process-echo"]
+keybindings = []
+themes = []
+
+[process]
+protocol = "winuxsh:process-plugin@0.1.0"
+command = "winuxsh-process-echo"
+args = ["--format", "json"]
+timeout_millis = 1000

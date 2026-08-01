@@ -1,0 +1,18 @@
+name = "themes"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "builtin"
+api = "winuxsh:plugin@0.1.0"
+category = "ux"
+summary = "Official Winuxsh color themes for prompt and Git status styling."
+default = true
+permissions = []
+required_binaries = []
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = []
+commands = []
+keybindings = []
+themes = ["cyberpunk", "forest", "minimal", "ocean"]

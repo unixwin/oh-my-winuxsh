@@ -1,0 +1,42 @@
+name = "oh-my-winuxsh"
+version = "1.0.0"
+publisher = "unixwin"
+api = "winuxsh:plugin-bundle@0.1.0"
+min_winuxsh = "0.8.3"
+channel = "stable"
+summary = "Official bundled plugin distribution for Winuxsh."
+
+[update]
+source = "github-release"
+repo = "unixwin/oh-my-winuxsh"
+asset = "oh-my-winuxsh-{version}.zip"
+
+[packs]
+default = ["git", "prompts", "keybindings", "themes"]
+available = [
+  "git",
+  "docker",
+  "kubectl",
+  "npm",
+  "zoxide",
+  "direnv",
+  "dotenv",
+  "fzf",
+  "command-not-found",
+  "last-working-dir",
+  "thefuck",
+  "process-echo",
+  "process-hook",
+  "wasm-hello",
+  "keybindings",
+  "prompts",
+  "themes",
+]
+
+[layout]
+packs_dir = "packs"
+aliases_dir = "aliases"
+completions_dir = "completions"
+prompts_dir = "prompts"
+keybindings_dir = "keybindings"
+themes_dir = "themes"

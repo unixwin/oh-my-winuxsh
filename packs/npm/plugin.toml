@@ -1,0 +1,19 @@
+name = "npm"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "builtin"
+api = "winuxsh:plugin@0.1.0"
+category = "devtools"
+summary = "npm aliases and runtime completion shape detection."
+default = false
+permissions = ["cwd:read", "process:run:npm"]
+required_binaries = ["npm"]
+
+[exports]
+aliases = true
+completions = ["npm"]
+prompt_segments = []
+hooks = []
+commands = []
+keybindings = []
+themes = []

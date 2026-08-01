@@ -1,0 +1,19 @@
+name = "thefuck"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "builtin"
+api = "winuxsh:plugin@0.1.0"
+category = "workflow"
+summary = "Correction shim for the previous interactive command."
+default = false
+permissions = ["history:read", "shell:execute:suggested-command", "process:run:thefuck"]
+required_binaries = ["thefuck"]
+
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = []
+commands = ["fuck"]
+keybindings = []
+themes = []

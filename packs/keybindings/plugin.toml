@@ -1,0 +1,22 @@
+name = "keybindings"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "builtin"
+api = "winuxsh:plugin@0.1.0"
+category = "ux"
+summary = "Winuxsh keybinding presets mapped to native reedline actions."
+default = true
+permissions = []
+required_binaries = []
+
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = []
+commands = []
+keybindings = ["common", "emacs", "vi"]
+themes = []
+
+[notes]
+zle = "This pack is not ZLE support and does not execute ZLE widget bodies."

@@ -1,8 +1,0 @@
-# Default Theme - Clean and Professional
-# A clean, modern theme with visible path and git information
-
-# Left prompt with colors
-PROMPT="%F{green}%n@%m%f %F{blue}%~%f %# "
-
-# Right prompt - show time and exit code
-RPROMPT="%F{yellow}%T%f %F{red}%(?..✘ %?)%f"

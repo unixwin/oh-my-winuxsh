@@ -1,0 +1,532 @@
+# Oh My Winuxsh Roadmap
+
+This roadmap is synchronized with Winuxsh's plugin-system roadmap. Phase numbers
+must stay aligned with `DOCS/plugin-system-roadmap.md` in the Winuxsh repo.
+
+`oh-my-winuxsh` is the official bundled plugin distribution for Winuxsh. It is
+not an Oh My Zsh fork, not a zsh plugin runtime, and not a sourced shell script
+framework.
+
+## Phase 0 - Repository Reset
+
+Status: done on this branch.
+
+- Preserve the old repository content with a legacy branch/tag.
+- Replace the working branch with bundle metadata.
+- Remove old `.winsh` script-framework content from the active product surface.
+- Document that zsh migration is only an onboarding source.
+
+Done when:
+
+- The branch contains `bundle.toml`, `packs/`, and docs.
+- The README no longer instructs users to source `winshrc`.
+
+## Phase 1 - Manifest Baseline
+
+Status: done on this branch.
+
+- Add `bundle.toml`.
+- Add `packs/<name>/plugin.toml` for:
+  - `git`;
+  - `docker`;
+  - `kubectl`;
+  - `npm`;
+  - `zoxide`;
+  - `direnv`;
+  - `dotenv`;
+  - `fzf`;
+  - `command-not-found`;
+  - `last-working-dir`;
+  - `thefuck`;
+  - `keybindings`;
+  - `prompts`.
+- Keep pack names, defaults, categories, permissions, and exports aligned with
+  Winuxsh's builtin registry.
+
+Done when:
+
+- All TOML files parse.
+- Every pack in `bundle.toml` has a matching `packs/<name>/plugin.toml`.
+- `winuxsh plugin list` can represent the same pack set.
+
+## Phase 2 - Managed Config Support
+
+Status: done on this branch.
+
+oh-my-winuxsh work:
+
+- Document canonical enable/disable examples:
+  - `[plugins]`;
+  - `[plugins.<pack>]`;
+  - permissions.
+- Keep permissions minimal and auditable.
+- Add validation for:
+  - missing pack directories;
+  - missing manifest fields;
+  - pack list drift between `bundle.toml` and `packs/`;
+  - unknown runtime kind/category.
+  - exported asset directory presence.
+
+Winuxsh dependency:
+
+- Done in the paired Winuxsh branch:
+  - `winuxsh plugin plan enable/disable <pack>`;
+  - `winuxsh plugin enable/disable <pack>`;
+  - managed TOML block writes with backups;
+  - refusal to overwrite user-authored `[plugins]`.
+
+Done when:
+
+- Manifest permissions are exactly what Winuxsh writes into managed TOML.
+- Docs tell users to use `winuxsh plugin ...`, not to edit rc for plugin state.
+- `python tools/validate_bundle.py` passes.
+
+## Phase 3 - Runtime Activation Assets
+
+Status: done on this branch.
+
+oh-my-winuxsh work:
+
+- Add asset directories:
+  - `aliases/`;
+  - `completions/`;
+  - `prompts/`;
+  - `keybindings/`.
+- Split data assets from manifests.
+- Mark which packs are pure metadata and which need Winuxsh builtin code.
+- Add tests that exported assets exist.
+
+Winuxsh dependency:
+
+- Done in the paired Winuxsh branch:
+  - effective plugin state resolves `[plugins]`, bundle defaults, and legacy
+    migration reads;
+  - `git` enables/disables the existing builtin alias pack;
+  - `docker`, `kubectl`, and `npm` alias packs activate from canonical
+    `[plugins]` state through Winuxsh's compiled fallback data;
+  - `zoxide` and other existing builtin shims can be activated from
+    canonical `[plugins]` state;
+  - explicit `keybindings` disable blocks legacy native widget presets and
+    imported bindkey suggestions;
+  - explicit `prompts` disable prevents Winuxsh segment prompt presets from
+    activating while leaving the core template prompt renderer available.
+
+Done when:
+
+- Enabling a pack through `[plugins]` can activate its existing Winuxsh builtin
+  behavior.
+- Static assets can be loaded from the bundle when present.
+
+## Phase 4 - Bundled Release Baseline
+
+Status: done on this branch for deterministic local release artifacts.
+
+oh-my-winuxsh work:
+
+- Produce a deterministic release zip:
+  - `bundle.toml`;
+  - `packs/`;
+  - static asset directories;
+  - docs;
+  - checksum.
+- Keep layout stable so Winuxsh installers can embed it.
+- Provide `tools/package_bundle.py` for deterministic zip and SHA-256 output.
+
+Winuxsh dependency:
+
+- Bundle install path and `plugin-lock.toml`.
+- `winuxsh plugin bundle status`.
+- Installed bundle manifest loading with compiled registry fallback.
+
+Done when:
+
+- A Winuxsh release can include this bundle and run offline.
+- The active bundle version can be inspected.
+- `py tools\package_bundle.py --check` passes.
+
+## Phase 5 - Independent Update and Rollback
+
+Status: in progress on the paired Winuxsh branch.
+
+oh-my-winuxsh work:
+
+- Publish GitHub releases with:
+  - `oh-my-winuxsh-{version}.zip`;
+  - checksum;
+  - changelog;
+  - compatibility notes.
+- Follow semver:
+  - patch: manifest or asset fix;
+  - minor: new pack or safe permission expansion;
+  - major: breaking manifest/API change.
+
+Winuxsh dependency:
+
+- `winuxsh plugin update oh-my-winuxsh --from <bundle-dir-or-zip>`.
+- `winuxsh plugin rollback oh-my-winuxsh`.
+- Atomic `plugin-lock.toml` switching with active and previous bundle paths.
+- Optional SHA-256 validation through `--checksum` or `--checksum-file`.
+
+Current branch progress:
+
+- `CHANGELOG.md` and `docs/compatibility.md` now document the publishable
+  release notes, bundle API, protocol versions, minimum host, and semver policy.
+- `tools/validate_bundle.py` requires release notes and compatibility docs, so
+  missing publish metadata fails the release gate.
+- `tools/package_bundle.py` includes `CHANGELOG.md`; docs already ship through
+  the `docs/` release directory.
+- `tools/package_bundle.py` emits the zip and `.sha256` artifacts consumed by
+  local `winuxsh plugin update`.
+- The paired Winuxsh branch can install local bundle directories or zips,
+  validate bundle API, `min_winuxsh`, manifests/API, and roll back by
+  switching the lock file.
+- `bundle.toml` now declares `api = "winuxsh:plugin-bundle@0.1.0"`
+  and `min_winuxsh = "0.8.3"`; the validator treats both as release
+  metadata.
+- The paired Winuxsh branch validates bundle-level API and refuses updates
+  whose `min_winuxsh` is newer than the running host.
+- The paired Winuxsh branch can download `--github-release latest|vX.Y.Z` from
+  `unixwin/oh-my-winuxsh`, fetch the matching `.sha256`, and enter the same
+  validated local update path.
+- GitHub release publishing remains the next layer after local and downloaded
+  artifact install/rollback.
+
+Done when:
+
+- Users can update this bundle without updating `winuxsh.exe`.
+- Failed update verification leaves the current bundle active.
+
+## Phase 6 - First-Party Asset Ownership
+
+Status: implemented on this branch.
+
+oh-my-winuxsh work:
+
+- Own first-party alias tables, completion definitions, prompt presets, and
+  keybinding metadata where safe.
+- Keep changelog entries for changed defaults or aliases.
+- Add compatibility tests for exported assets.
+
+Current branch progress:
+
+- `aliases/git.toml`, `aliases/docker.toml`, `aliases/kubectl.toml`, and
+  `aliases/npm.toml` now own the first-party alias tables for builtin alias
+  packs.
+- `tools/validate_bundle.py` checks that every pack with `exports.aliases = true`
+  has a parseable non-empty `aliases/<pack>.toml` file.
+- The paired Winuxsh branch loads active bundle aliases before compiled fallback
+  aliases, so a bundle release can change aliases without replacing
+  `winuxsh.exe`.
+- `completions/git.toml`, `completions/docker.toml`,
+  `completions/kubectl.toml`, and `completions/npm.toml` now own first-party
+  static completion definitions for the same devtool packs.
+- `tools/validate_bundle.py` checks every exported completion has a matching
+  parseable `completions/<name>.toml` file whose `command` matches the export.
+- `prompts/segments.toml` now owns first-party prompt segment mappings and the
+  `lean`, `classic`, `rainbow`, `pure`, and `robbyrussell` preset layouts.
+- `keybindings/common.toml`, `keybindings/emacs.toml`, and
+  `keybindings/vi.toml` now own declarative keybinding metadata for native
+  Winuxsh editor actions. They do not execute ZLE widgets or shell scripts.
+- `tools/validate_bundle.py` checks exported prompt segments resolve to
+  declared assets, preset segment references are valid, and exported
+  keybinding metadata has non-empty key/action pairs.
+- The paired Winuxsh branch loads active bundle prompt presets before compiled
+  fallback presets while keeping user-authored prompt element overrides
+  authoritative.
+- The paired Winuxsh branch surfaces active bundle keybinding metadata through
+  `winuxsh plugin info keybindings`, proving keymap summaries and binding counts
+  can update independently from `winuxsh.exe`.
+
+Winuxsh dependency:
+
+- Bundle asset loader with compiled fallback and user-visible metadata inspection.
+
+Done when:
+
+- A bundle release can update a first-party completion, prompt preset, or
+  keybinding metadata file without replacing Winuxsh itself.
+
+## Phase 7 - Process Plugin Fixtures
+
+Status: implemented on this branch.
+
+oh-my-winuxsh work:
+
+- Add process plugin examples only after the host contract exists.
+- Mark every process pack explicit opt-in.
+- Document timeouts and failure behavior.
+
+Current branch progress:
+
+- `packs/process-echo/plugin.toml` is the explicit opt-in process command
+  fixture.
+- `packs/process-hook/plugin.toml` is the explicit opt-in process lifecycle
+  hook fixture.
+- Both fixtures declare `[process]` with protocol
+  `winuxsh:process-plugin@0.1.0`, command, args, and timeout metadata.
+- `tools/validate_bundle.py` now rejects process packs that are default-enabled,
+  omit `[process]`, omit `process:run:<command>`, exceed timeout bounds, or
+  fail to export at least one command/hook.
+
+Winuxsh dependency:
+
+- `kind = "process"` backend with permissions and deterministic IO.
+- Current Winuxsh branch validates and surfaces the process manifest contract,
+  executes enabled process commands, and runs enabled startup/precmd/preexec/
+  chpwd process hooks without allowing shell-state mutation.
+
+Done when:
+
+- Process manifests use the same schema as builtin manifests.
+- A failed or timed-out process plugin cannot corrupt shell state.
+
+## Phase 8 - WASM Host Fixtures
+
+Status: command execution fixture implemented on this branch.
+
+oh-my-winuxsh work:
+
+- Add a small WASM example only as a host API fixture.
+- Keep official first-party packs builtin unless WASM adds real distribution
+  value.
+- Document WASM permission requirements.
+
+Current branch progress:
+
+- Added `packs/wasm-hello/plugin.toml` as an explicit opt-in WASM host API
+  fixture.
+- The validator rejects WASM packs that are default-enabled, omit `[wasm]`, use
+  native `process:run:*` permissions, declare native required binaries, export
+  lifecycle hooks, or exceed timeout/memory bounds.
+- The fixture includes `wasm/wasm-hello.wasm`, its checked SHA-256, and a
+  reviewable `wasm/wasm-hello.wat` source file.
+- `wasm-hello` exports `winuxsh_plugin_main() -> i32`, matching the current
+  Winuxsh command host contract.
+
+Winuxsh dependency:
+
+- Stable WASM command host API and sandbox. Current Winuxsh branch validates and
+  surfaces the manifest contract, then executes enabled command modules with
+  wasmi, memory caps, fuel metering, deterministic missing-export failure, exit
+  code 124 for out-of-fuel modules, and Phase 14-17 `winuxsh:plugin/host`
+  stdout/stderr, command-argument, and permission-gated cwd/env imports backed by
+  exported module memory.
+
+Done when:
+
+- A third-party WASM command plugin can be installed and run without
+  native-code trust.
+
+## Phase 9 - Public Authoring Model
+
+Status: implemented on this branch.
+
+oh-my-winuxsh work:
+
+- Become the reference bundle layout.
+- Add authoring templates.
+- Add manifest schema docs.
+- Add validation scripts suitable for CI.
+- Use `winuxsh plugin doctor [--json]` as the host-side smoke diagnostic for
+  active bundle state, enabled packs, missing required binaries, and permission
+  drift while authoring manifests.
+- Use `winuxsh plugin review <pack> [--json]` as the host-side permission
+  review surface for manifest permissions, runtime kind, exported surfaces, and
+  required binaries before enabling a pack.
+
+Current branch progress:
+
+- Added `docs/authoring.md` with the public manifest schema, permission token
+  table, runtime contracts, asset rules, and release checklist.
+- Added copyable `templates/builtin`, `templates/process`, and `templates/wasm`
+  manifest templates.
+- `tools/validate_bundle.py` now checks that the authoring guide and templates
+  exist and that each template parses with the expected runtime kind.
+- `tools/package_bundle.py` includes `templates/` in deterministic release
+  artifacts.
+- `.github/workflows/bundle.yml` runs py_compile, `validate_bundle.py`, and
+  deterministic package checks on push and pull requests.
+- `tools/validate_bundle.py` validates the CI workflow so release gates stay
+  wired into the repository.
+
+- `index.toml` now defines the Phase 9 package discovery index and is
+  validated against every pack manifest before packaging.
+
+Winuxsh dependency:
+
+- Plugin discovery/install, permission review, and compatibility policy. Current
+  Winuxsh branch has `plugin search`, `plugin install`, `plugin doctor`, and
+  `plugin review` surfaces.
+Done when:
+
+- Third-party authors can build plugins without copying zsh or Oh My Zsh
+  conventions.
+
+## Phase 10 - Legacy Cleanup
+
+Status: implemented on this branch.
+
+oh-my-winuxsh work:
+
+- Keep the legacy tag/branch for history.
+- Keep docs clear that the active bundle does not source zsh or `.winsh`
+  plugins.
+- Remove any remaining active-surface references to sourced plugin scripts.
+
+Current branch progress:
+
+- `legacy-pre-winuxsh-plugin-system` exists as both a branch and tag for the old
+  `.winsh` script-framework state.
+- README, design, authoring, and compatibility docs present the manifest-first
+  Winuxsh plugin model as the active surface.
+- Remaining zsh and `.winsh` references are confined to migration, non-goals, or
+  legacy preservation notes.
+
+Winuxsh dependency:
+
+- `[plugins]` is the primary config path.
+- Old zsh-native wording is confined to migration notes.
+
+Done when:
+
+- New users see only the Winuxsh-native plugin model.
+
+## Phase 11 - Theme Pack Assets
+
+Status: implemented on this branch as the official bundle foundation; third-party
+theme marketplace/distribution remains future work.
+
+oh-my-winuxsh work:
+
+- Add a `themes` builtin UX pack with static theme assets.
+- Ship `themes/cyberpunk.toml`, `themes/forest.toml`, `themes/minimal.toml`,
+  and `themes/ocean.toml` using the same style schema as user themes.
+- Validate exported theme files in `tools/validate_bundle.py`.
+- Include `themes/` in deterministic release artifacts.
+
+Winuxsh dependency:
+
+- The paired Winuxsh branch loads active official bundle themes after built-in
+  themes and user theme files, so bundle updates can add or revise official
+  themes without replacing `winuxsh.exe`.
+
+Done when:
+
+- `current_theme = "ocean"` can resolve from the active official bundle.
+- Invalid or missing exported theme assets fail bundle validation before install.
+
+## Phase 12 - Registry Trust Policy Foundation
+Status: implemented on this branch for the official bundle index policy;
+third-party registry signing remains future work.
+
+oh-my-winuxsh work:
+- Treat `oh-my-winuxsh` as the official first-party bundle and reference layout,
+  not as the only place future plugins can live.
+- Require `index.toml` release metadata to declare `checksum_required = true`,
+  `checksum_algorithm = "sha256"`, and `signature = "unsupported"` until
+  signing support is implemented.
+- Validate index bundle/version/API/min-host fields and pack entries against
+  `bundle.toml` and every pack manifest before packaging.
+
+Winuxsh dependency:
+- The paired Winuxsh branch validates installed bundle `index.toml` before
+  switching `plugin-lock.toml`.
+- Zip updates with checksum-required indexes must pass `--checksum` or
+  `--checksum-file`; index drift leaves the existing active bundle untouched.
+
+Done when:
+- A release index cannot silently drift from shipped manifests.
+- Missing checksum verification blocks zip install/update.
+- Unsupported signatures are explicit rather than implied.
+
+## Phase 13 - Theme Market Discovery Surface
+
+Status: implemented on the paired Winuxsh branch as a read-only catalog
+foundation; theme install/apply marketplace commands remain future work.
+
+oh-my-winuxsh work:
+- Keep official `themes/*` assets under the `themes` pack as the first bundle
+  catalog data source.
+- Document `winuxsh plugin themes` as the read-only bridge from the official
+  bundle into future third-party theme distribution.
+
+Winuxsh dependency:
+- The paired Winuxsh branch exposes `winuxsh plugin themes [--json]` for
+  built-in, user, and active bundle theme sources.
+- The catalog preserves built-in > user > active bundle resolution order and
+  does not install or select themes automatically.
+
+Done when:
+- Text and JSON theme catalog commands list active bundle theme metadata.
+- Existing bundle validation continues to reject missing or invalid exported
+  theme assets.
+## Future Direction - Code-Bearing Packs
+Status: proposed direction; this describes where the bundle should go after the
+current TOML-first foundation.
+The active bundle is not meant to stay limited to aliases and static metadata.
+It is TOML-heavy today because many first-party packs are `builtin` packs whose
+behavior still lives in Winuxsh. That is a transitional shape, not the final
+definition of a plugin ecosystem.
+The immediate gate is [Externalization Readiness](externalization-readiness.md):
+classify every pack before changing manifest schema or moving behavior into
+WASM/process artifacts.
+oh-my-winuxsh work:
+- Keep static assets in TOML where TOML is enough:
+  - aliases;
+  - completion definitions;
+  - prompt presets;
+  - keybinding metadata;
+  - themes.
+- Treat these asset/declarative packs separately from host-owned builtin
+  behavior even while manifests still use today's schema.
+- Add code-bearing pack artifacts only through explicit runtime contracts:
+  - WASM modules for sandboxed providers and commands;
+  - process manifests for adapters around existing native tools.
+- Do not add sourced shell-script plugins or require users to source bundle
+  files from `~/.winshrc`.
+- Document every code-bearing pack's permissions, host API surface, timeout,
+  resource limit, and rollback behavior before making it a normal pack.
+Winuxsh dependency:
+- WASM host APIs for more than command fixtures:
+  - completion/provider output;
+  - prompt segment output;
+  - scoped file reads;
+  - env writes;
+  - cwd writes;
+  - lifecycle hook context.
+- Process plugin behavior for tools where native process execution is the
+  point, such as `thefuck`, `direnv`, and `fzf`-style selectors.
+- Permission review that clearly distinguishes static assets, builtin host
+  behavior, process execution, and sandboxed WASM execution.
+Candidate migration order:
+- Start with the implemented Winuxsh process binding for the
+  [command-not-found provider](command-not-found-provider-abi.md), keep the official pack builtin until migration is deliberate, then expand
+  to prompt segment calculators, completion providers, and formatting/suggestion
+  helpers after that provider shape is proven.
+- Move external-tool adapters through `process` when the plugin mostly invokes
+  an existing executable.
+- Move shell-mutating helpers such as `zoxide`, `dotenv`, and lifecycle hooks
+  only after Winuxsh exposes explicit permissioned host APIs for env/cwd/file
+  mutation and deterministic failure behavior.
+Done when:
+- At least one non-fixture first-party pack ships as WASM or process instead of
+  `builtin`.
+- Users can still put personal bash-like customization in `~/.winshrc`.
+- Distributed plugin code remains manifest-reviewed and does not become an
+  arbitrary rc/source mechanism.
+## Sync Policy
+Every pack change must update:
+
+- `bundle.toml`;
+- `packs/<name>/plugin.toml`;
+- README pack table;
+- this roadmap if it changes phase scope;
+- Winuxsh registry/tests if the pack is builtin.
+
+Every release must include:
+
+- bundle version;
+- minimum Winuxsh version;
+- checksum;
+- changelog;
+- rollback-safe artifact layout.

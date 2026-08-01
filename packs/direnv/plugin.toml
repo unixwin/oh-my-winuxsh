@@ -1,0 +1,19 @@
+name = "direnv"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "builtin"
+api = "winuxsh:plugin@0.1.0"
+category = "environment"
+summary = "direnv environment export on Winuxsh lifecycle hooks."
+default = false
+permissions = ["cwd:read", "env:write", "process:run:direnv"]
+required_binaries = ["direnv"]
+
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = ["precmd", "chpwd"]
+commands = []
+keybindings = []
+themes = []

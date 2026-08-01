@@ -1,0 +1,19 @@
+name = "dotenv"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "builtin"
+api = "winuxsh:plugin@0.1.0"
+category = "environment"
+summary = "Safe .env loader on Winuxsh lifecycle hooks."
+default = false
+permissions = ["cwd:read", "fs:read:.env", "env:write"]
+required_binaries = []
+
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = ["precmd", "chpwd"]
+commands = []
+keybindings = []
+themes = []

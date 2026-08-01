@@ -1,0 +1,23 @@
+name = "process-hook"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "process"
+api = "winuxsh:plugin@0.1.0"
+category = "workflow"
+summary = "Process plugin lifecycle hook contract fixture."
+default = false
+permissions = ["cwd:read", "process:run:winuxsh-process-hook"]
+required_binaries = ["winuxsh-process-hook"]
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = ["startup", "precmd", "preexec", "chpwd"]
+commands = []
+keybindings = []
+themes = []
+[process]
+protocol = "winuxsh:process-plugin@0.1.0"
+command = "winuxsh-process-hook"
+args = ["--format", "json"]
+timeout_millis = 1000

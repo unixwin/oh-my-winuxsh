@@ -1,0 +1,19 @@
+name = "docker"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "builtin"
+api = "winuxsh:plugin@0.1.0"
+category = "devtools"
+summary = "Docker aliases and completion hints."
+default = false
+permissions = ["cwd:read", "process:run:docker"]
+required_binaries = ["docker"]
+
+[exports]
+aliases = true
+completions = ["docker"]
+prompt_segments = []
+hooks = []
+commands = []
+keybindings = []
+themes = []

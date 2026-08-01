@@ -1,0 +1,28 @@
+name = "example-wasm"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "wasm"
+api = "winuxsh:plugin@0.1.0"
+category = "workflow"
+summary = "WASM command plugin pack template."
+default = false
+permissions = ["cwd:read"]
+required_binaries = []
+
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = []
+commands = ["example-wasm"]
+keybindings = []
+themes = []
+providers = []
+
+[wasm]
+protocol = "winuxsh:wasm-plugin@0.1.0"
+module = "wasm/example-wasm.wasm"
+sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+wit_world = "winuxsh:plugin/example"
+timeout_millis = 1000
+max_memory_pages = 16

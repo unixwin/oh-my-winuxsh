@@ -1,86 +1,212 @@
-# Oh My Winuxsh!
+# Oh My Winuxsh
 
-A framework for managing your [WinSH](https://github.com/caomengxuan666/winuxsh) shell configuration. Inspired by [Oh My Zsh](https://ohmyz.sh/).
+Official bundled plugin distribution for Winuxsh.
 
-## Features
+This repository is not an Oh My Zsh fork and does not provide zsh plugin
+compatibility. It contains first-party Winuxsh plugin bundle metadata that the
+Winuxsh plugin system can ship, inspect, update, and roll back.
 
-- **5 Beautiful Themes**: Default, Cyberpunk, Ocean, Minimal, Forest
-- **Git Plugin**: 50+ git aliases and enhanced prompt info
-- **Completion Plugin**: Extended tab completions
-- **Core Library**: Color definitions, Unicode symbols, helper functions
-- **Easy Configuration**: Simple `.winshrc` integration
+## Status
 
-## Installation
+This branch rebuilds the repository for the current Winuxsh architecture:
 
-### Option 1: Git Clone
-```bash
-git clone https://github.com/caomengxuan666/oh-my-winuxsh.git $HOME/.oh-my-winuxsh
-echo 'source $HOME/.oh-my-winuxsh/winshrc' >> $HOME/.winshrc
+- Winuxsh owns the shell frontend, config, plugin registry, and permission model.
+- `oh-my-winuxsh` provides official plugin manifests and bundled assets.
+- Existing first-party behavior starts as `kind = "builtin"` packs in winuxsh.
+- Future third-party plugins should use the same manifest model, with WASM/WASI
+  as the preferred runtime once the host API is stable.
+
+## Bundle Model
+
+The bundle is expected to ship with Winuxsh releases, similar to how winuxcmd is
+bundled as the default coreutils layer. Users should have a local baseline even
+without network access, then update the bundle independently:
+
+```sh
+winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.0.zip --checksum-file dist\oh-my-winuxsh-1.0.0.zip.sha256
+winuxsh plugin rollback oh-my-winuxsh
 ```
 
-### Option 2: Manual Download
-Download the latest release and extract to `$HOME/.oh-my-winuxsh`.
+Plugin state belongs in `~/.winshrc.toml`:
 
-## Themes
+```toml
+[plugins]
+enabled = true
+bundles = ["oh-my-winuxsh"]
+load = ["git", "prompts", "keybindings"]
 
-| Theme | Preview | Description |
-|-------|---------|-------------|
-| `default` | `➜ ~` | Clean and professional with git status |
-| `cyberpunk` | `⚡ ▶ ~` | Neon-style with cyberpunk aesthetics |
-| `ocean` | `❯ 🌊 ~` | Calming blue and green ocean vibes |
-| `minimal` | `λ ~` | Minimal with just the essentials |
-| `forest` | `↳ 🌲 ~` | Nature-inspired forest colors |
-
-To change theme, set `WINUXSH_THEME` in your `.winshrc`:
-```bash
-WINUXSH_THEME="cyberpunk"
+[plugins.git]
+enabled = true
+permissions = ["cwd:read", "process:run:git"]
 ```
 
-## Plugins
+User shell code belongs in `~/.winshrc`:
 
-### Git Plugin
-Provides 50+ git aliases and enhanced prompt integration.
-- `gst` for `git status`, `gco` for `git checkout`, etc.
-- Shows branch, ahead/behind, staged/unstaged in prompt
-
-### Completion Plugin
-Enhances tab completion with additional contexts.
-- Git commands completion
-- SSH hostname completion
-- Docker, Cargo, NPM command completions
-
-## Configuration
-
-Place configuration in `$HOME/.winshrc`:
-```bash
-# Set theme
-WINUXSH_THEME="ocean"
-
-# Set plugins
-plugins=(
-    git
-    completion
-)
+```sh
+alias ll='ls -la'
+export EDITOR=vim
 ```
 
-## Directory Structure
+## Repository Layout
+
+```text
+oh-my-winuxsh/
+  bundle.toml
+  index.toml
+  packs/
+    git/plugin.toml
+    docker/plugin.toml
+    kubectl/plugin.toml
+    npm/plugin.toml
+    zoxide/plugin.toml
+    direnv/plugin.toml
+    dotenv/plugin.toml
+    fzf/plugin.toml
+    command-not-found/plugin.toml
+    last-working-dir/plugin.toml
+    thefuck/plugin.toml
+    process-echo/plugin.toml
+    process-hook/plugin.toml
+    wasm-hello/plugin.toml
+    keybindings/plugin.toml
+    prompts/plugin.toml
+  aliases/
+    git.toml
+    docker.toml
+    kubectl.toml
+    npm.toml
+    README.md
+  completions/
+    git.toml
+    docker.toml
+    kubectl.toml
+    npm.toml
+    README.md
+  prompts/
+    segments.toml
+    README.md
+  keybindings/
+    common.toml
+    emacs.toml
+    vi.toml
+    README.md
+  themes/
+    cyberpunk.toml
+    forest.toml
+    minimal.toml
+    ocean.toml
+    README.md
+  wasm/
+    wasm-hello.wasm
+    wasm-hello.wat
+  docs/
+    authoring.md
+    design.md
+    migration.md
+    roadmap.md
+  templates/
+    builtin/plugin.toml
+    process/plugin.toml
+    wasm/plugin.toml
 ```
-~/.oh-my-winuxsh/
-├── winshrc              # Main entry point
-├── lib/
-│   └── core.winsh       # Core utilities
-├── themes/
-│   ├── default.theme.winsh
-│   ├── cyberpunk.theme.winsh
-│   ├── ocean.theme.winsh
-│   ├── minimal.theme.winsh
-│   └── forest.theme.winsh
-├── plugins/
-│   ├── git.plugin.winsh
-│   └── completion.plugin.winsh
-└── README.md
+
+## First-Party Packs
+
+| Pack | Purpose | Default |
+| --- | --- | --- |
+| `git` | Git aliases, completions, prompt segment | On |
+| `docker` | Docker aliases and completion metadata | Off |
+| `kubectl` | Kubernetes aliases and completion metadata | Off |
+| `npm` | npm aliases and runtime completion shape | Off |
+| `zoxide` | Native `z` command shim and directory tracking | Off |
+| `direnv` | Explicit lifecycle hook adapter for `direnv export bash` | Off |
+| `dotenv` | Safe `.env` parser for current project directory | Off |
+| `fzf` | Directory selector command shims | Off |
+| `command-not-found` | Interactive missing-command hints | Off |
+| `last-working-dir` | Last working directory cache and restore command | Off |
+| `thefuck` | Correction shim for the previous interactive command | Off |
+| `process-echo` | Process plugin host contract fixture | Off |
+| `process-hook` | Process plugin lifecycle hook contract fixture | Off |
+| `wasm-hello` | WASM host API contract fixture | Off |
+| `keybindings` | Winuxsh keybinding presets, not ZLE support | On |
+| `prompts` | Prompt presets and segment defaults | On |
+| `themes` | Official prompt and Git status color themes | On |
+
+## Authoring
+
+Public pack authoring starts in [docs/authoring.md](docs/authoring.md). Use the
+copyable templates under `templates/` for builtin, process, and WASM manifests,
+then run:
+
+```sh
+python tools/validate_bundle.py
+python tools/package_bundle.py --check
+winuxsh plugin review <pack>
+winuxsh plugin search devtools
+winuxsh plugin themes
+winuxsh plugin install git
+winuxsh plugin doctor
+```
+
+The authoring contract is manifest-first: TOML declares runtime kind,
+permissions, exports, and required binaries before Winuxsh runs plugin code.
+
+## Legacy
+
+The old repository content was a `.winsh` script framework from a previous
+WinSH era. It is preserved through the `legacy-pre-winuxsh-plugin-system`
+branch/tag; the active branch describes the official Winuxsh plugin bundle.
+
+See [docs/migration.md](docs/migration.md).
+
+## Roadmap
+
+The synchronized implementation roadmap lives in [docs/roadmap.md](docs/roadmap.md).
+Its phase numbers are aligned with Winuxsh's `DOCS/plugin-system-roadmap.md`.
+Release compatibility is tracked in [docs/compatibility.md](docs/compatibility.md),
+and bundle changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+
+## Validation And Packaging
+
+```sh
+python tools/validate_bundle.py
+python tools/package_bundle.py --check
+# Windows launcher:
+py tools\validate_bundle.py
+py tools\package_bundle.py --check
+```
+
+The validator checks release documents, package index drift, release checksum policy, bundle API and minimum Winuxsh metadata,
+bundle inventory drift, manifest required fields, allowed runtime
+kinds/categories, exported asset directory presence, parseable alias packs,
+parseable completion definitions, prompt preset segment references, and
+declarative keybinding metadata and theme TOML assets for exported packs, plus the Phase 9 authoring
+guide and templates. Process manifests must be explicit opt-in and declare
+protocol, command, timeout, permissions, and required binaries. The package
+script builds `dist/oh-my-winuxsh-{version}.zip` plus a `.sha256` checksum when
+run without `--check`.
+WASM manifests must also declare a bundle-local `.wasm` module path and SHA-256;
+the validator checks that the artifact exists, matches the digest, and has a
+valid WASM binary header. The current Winuxsh host can execute explicit command
+fixtures that export `winuxsh_plugin_main() -> i32`, may write stdout/stderr,
+may read simple command arguments, read cwd when `cwd:read` is declared, and
+read explicitly permitted env values through `env:read:<NAME>` using the Phase
+14-17 `winuxsh:plugin/host` imports; broader WASI and
+shell-mutating host APIs remain future work.
+
+Local release smoke test:
+
+```sh
+py tools\package_bundle.py
+winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.0.zip --checksum-file dist\oh-my-winuxsh-1.0.0.zip.sha256
+winuxsh plugin bundle status
+winuxsh plugin search workflow
+winuxsh plugin doctor
+winuxsh plugin review wasm-hello
+winuxsh plugin search workflow
 ```
 
 ## License
 
-MIT
+MIT unless the Unixwin project chooses a different repository license before the
+first bundle release.
