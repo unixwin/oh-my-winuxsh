@@ -1,6 +1,6 @@
 name = "example-wasm"
 bundle = "oh-my-winuxsh"
-version = "1.0.0"
+version = "1.0.1"
 kind = "wasm"
 api = "winuxsh:plugin@0.1.0"
 category = "workflow"

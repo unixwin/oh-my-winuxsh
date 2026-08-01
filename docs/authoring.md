@@ -41,7 +41,7 @@ python tools/package_bundle.py --check
 6. Smoke the host-side review surface:
 
 ```sh
-winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.0.zip --checksum-file dist\oh-my-winuxsh-1.0.0.zip.sha256
+winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.1.zip --checksum-file dist\oh-my-winuxsh-1.0.1.zip.sha256
 winuxsh plugin doctor
 winuxsh plugin search <pack>
 winuxsh plugin review <pack>
@@ -76,7 +76,7 @@ Every `packs/<name>/plugin.toml` must include:
 ```toml
 name = "example"
 bundle = "oh-my-winuxsh"
-version = "1.0.0"
+version = "1.0.1"
 kind = "source" # asset/static data may still use builtin fallback; runtime kinds include source | builtin | process | wasm
 api = "winuxsh:plugin@0.1.0"
 category = "workflow" # devtools | environment | workflow | hints | ux

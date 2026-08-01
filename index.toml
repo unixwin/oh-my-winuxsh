@@ -1,19 +1,19 @@
 schema = "winuxsh:plugin-index@0.1.0"
 bundle = "oh-my-winuxsh"
-version = "1.0.0"
+version = "1.0.1"
 bundle_api = "winuxsh:plugin-bundle@0.1.0"
-min_winuxsh = "0.8.3"
+min_winuxsh = "0.9.4"
 
 [release]
-artifact = "oh-my-winuxsh-1.0.0.zip"
-checksum = "oh-my-winuxsh-1.0.0.zip.sha256"
+artifact = "oh-my-winuxsh-1.0.1.zip"
+checksum = "oh-my-winuxsh-1.0.1.zip.sha256"
 checksum_algorithm = "sha256"
 checksum_required = true
 signature = "unsupported"
 
 [[packs]]
 name = "git"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "devtools"
@@ -24,7 +24,7 @@ required_binaries = ["git"]
 
 [[packs]]
 name = "docker"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "devtools"
@@ -35,7 +35,7 @@ required_binaries = ["docker"]
 
 [[packs]]
 name = "kubectl"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "devtools"
@@ -46,7 +46,7 @@ required_binaries = ["kubectl"]
 
 [[packs]]
 name = "npm"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "devtools"
@@ -57,7 +57,7 @@ required_binaries = ["npm"]
 
 [[packs]]
 name = "zoxide"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "workflow"
@@ -68,7 +68,7 @@ required_binaries = ["zoxide"]
 
 [[packs]]
 name = "direnv"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "environment"
@@ -79,7 +79,7 @@ required_binaries = ["direnv"]
 
 [[packs]]
 name = "dotenv"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "environment"
@@ -90,7 +90,7 @@ required_binaries = []
 
 [[packs]]
 name = "fzf"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "workflow"
@@ -101,7 +101,7 @@ required_binaries = ["fzf"]
 
 [[packs]]
 name = "command-not-found"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "builtin"
 category = "hints"
@@ -112,7 +112,7 @@ required_binaries = []
 
 [[packs]]
 name = "last-working-dir"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "workflow"
@@ -123,7 +123,7 @@ required_binaries = []
 
 [[packs]]
 name = "thefuck"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "source"
 category = "workflow"
@@ -134,7 +134,7 @@ required_binaries = ["thefuck"]
 
 [[packs]]
 name = "keybindings"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "builtin"
 category = "ux"
@@ -145,7 +145,7 @@ required_binaries = []
 
 [[packs]]
 name = "prompts"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "builtin"
 category = "ux"
@@ -156,7 +156,7 @@ required_binaries = []
 
 [[packs]]
 name = "themes"
-version = "1.0.0"
+version = "1.0.1"
 api = "winuxsh:plugin@0.1.0"
 kind = "builtin"
 category = "ux"

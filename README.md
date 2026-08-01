@@ -25,7 +25,7 @@ bundled as the default coreutils layer. Users should have a local baseline even
 without network access, then update the bundle independently:
 
 ```sh
-winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.0.zip --checksum-file dist\oh-my-winuxsh-1.0.0.zip.sha256
+winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.1.zip --checksum-file dist\oh-my-winuxsh-1.0.1.zip.sha256
 winuxsh plugin rollback oh-my-winuxsh
 ```
 
@@ -207,7 +207,7 @@ Local release smoke test:
 
 ```sh
 py tools\package_bundle.py
-winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.0.zip --checksum-file dist\oh-my-winuxsh-1.0.0.zip.sha256
+winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.1.zip --checksum-file dist\oh-my-winuxsh-1.0.1.zip.sha256
 winuxsh plugin bundle status
 winuxsh plugin search workflow
 winuxsh plugin doctor

@@ -6,9 +6,9 @@ oh-my-winuxsh bundle.
 ## Current Release
 
 - Bundle name: `oh-my-winuxsh`
-- Bundle version: `1.0.0`
+- Bundle version: `1.0.1`
 - Release channel: `stable`
-- Minimum host: `min_winuxsh = "0.8.3"`
+- Minimum host: `min_winuxsh = "0.9.4"`
 - Bundle API: `winuxsh:plugin-bundle@0.1.0`
 - Pack manifest API: `winuxsh:plugin@0.1.0`
 - Source plugin script suffix: `.winux`
