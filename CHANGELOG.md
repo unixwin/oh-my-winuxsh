@@ -12,11 +12,11 @@ changes, and user-visible asset changes.
   a legacy `.winsh` script framework.
 - Added bundle metadata with `api = "winuxsh:plugin-bundle@0.1.0"` and
   `min_winuxsh = "0.8.3"`.
-- Added first-party source packs for Git, Docker, kubectl, and npm with
-  bundle-local `.winux` startup code.
-- Added first-party builtin/native packs for zoxide,
-  direnv, dotenv, fzf, command-not-found, last-working-dir, thefuck, prompts,
-  and keybindings.
+- Added first-party source packs for Git, Docker, kubectl, npm, zoxide,
+  direnv, dotenv, fzf, last-working-dir, and thefuck with bundle-local `.winux`
+  startup and lifecycle hook code.
+- Added first-party builtin/native packs for command-not-found, prompts, and
+  keybindings where host-owned provider/editor/prompt behavior still applies.
 - Added explicit opt-in process fixture packs and a no-import WASM command
   fixture for host-side runtime validation.
 - Added bundle-owned aliases, completions, prompt presets, keybinding metadata,

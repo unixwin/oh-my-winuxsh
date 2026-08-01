@@ -22,8 +22,9 @@ bundle safely.
 ## Runtime Surface
 
 - `source` packs load bundle-local `.winux` scripts into the current
-  interactive Winuxsh session. They are active for the interactive REPL and
-  `-C`; ordinary `-c`, script-file, and stdin execution stay clean by default.
+  interactive Winuxsh session during `startup`, `precmd`, `preexec`, and
+  `chpwd` lifecycle hooks. They are active for the interactive REPL and `-C`;
+  ordinary `-c`, script-file, and stdin execution stay clean by default.
 - `builtin` packs load first-party aliases, completions, prompts, keybindings,
   themes, and built-in Winuxsh fallback/native behavior.
 - `process` packs are explicit opt-in adapters for native commands. They must
@@ -39,8 +40,8 @@ bundle safely.
   candidate, and process packs may use the implemented command-not-found
   provider binding when `command:diagnose` is declared. WASM packs cannot
   export providers until Winuxsh defines a separate WASM provider contract.
-- Shell-mutating WASM host APIs, arbitrary zsh source, WASI, files, processes,
-  env mutation, ZLE widgets, DLL plugins, and unbounded native process bridges
+- Shell-mutating WASM host APIs, arbitrary zsh source, WASI, unrestricted files,
+  unrestricted processes, ZLE widgets, DLL plugins, and unbounded native process bridges
   are outside the current compatibility contract.
 
 ## Semver Policy

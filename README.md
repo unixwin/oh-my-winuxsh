@@ -12,7 +12,7 @@ This branch rebuilds the repository for the current Winuxsh architecture:
 
 - Winuxsh owns the shell frontend, config, plugin registry, and permission model.
 - `oh-my-winuxsh` provides official plugin manifests and bundled assets.
-- First-party shell plugins can ship `.winux` startup code through
+- First-party shell plugins can ship `.winux` startup and lifecycle hook code through
   `kind = "source"`, close to the Oh My Zsh model but gated by manifests and
   permission review.
 - Future sandboxed third-party providers can use the same manifest model, with
@@ -65,12 +65,18 @@ oh-my-winuxsh/
     npm/plugin.toml
     npm/init.winux
     zoxide/plugin.toml
+    zoxide/init.winux
     direnv/plugin.toml
+    direnv/init.winux
     dotenv/plugin.toml
+    dotenv/init.winux
     fzf/plugin.toml
+    fzf/init.winux
     command-not-found/plugin.toml
     last-working-dir/plugin.toml
+    last-working-dir/init.winux
     thefuck/plugin.toml
+    thefuck/init.winux
     process-echo/plugin.toml
     process-hook/plugin.toml
     wasm-hello/plugin.toml
@@ -126,13 +132,13 @@ oh-my-winuxsh/
 | `docker` | Docker `.winux` helpers, aliases, completion metadata | Off |
 | `kubectl` | Kubernetes `.winux` helpers, aliases, completion metadata | Off |
 | `npm` | npm `.winux` helpers, aliases, runtime completion shape | Off |
-| `zoxide` | Native `z` command shim and directory tracking | Off |
-| `direnv` | Explicit lifecycle hook adapter for `direnv export bash` | Off |
-| `dotenv` | Safe `.env` parser for current project directory | Off |
-| `fzf` | Directory selector command shims | Off |
+| `zoxide` | `.winux` `z`/`zi` helpers plus directory tracking hooks | Off |
+| `direnv` | `.winux` lifecycle adapter for `direnv export bash` | Off |
+| `dotenv` | `.winux` `.env` loader for current project directory | Off |
+| `fzf` | `.winux` directory selector command shims | Off |
 | `command-not-found` | Interactive missing-command hints | Off |
-| `last-working-dir` | Last working directory cache and restore command | Off |
-| `thefuck` | Correction shim for the previous interactive command | Off |
+| `last-working-dir` | `.winux` last-directory cache and restore hooks | Off |
+| `thefuck` | `.winux` correction shim for the previous command | Off |
 | `process-echo` | Process plugin host contract fixture | Off |
 | `process-hook` | Process plugin lifecycle hook contract fixture | Off |
 | `wasm-hello` | WASM host API contract fixture | Off |
@@ -158,7 +164,9 @@ winuxsh plugin doctor
 
 The authoring contract is manifest-first: TOML declares runtime kind,
 permissions, exports, and required binaries before Winuxsh runs plugin code.
-Source plugins put shell code in bundle-local `.winux` files.
+Source plugins put shell code in bundle-local `.winux` files and may export
+`startup`, `precmd`, `preexec`, or `chpwd` hooks when the Winuxsh host supports
+source lifecycle hooks.
 
 ## Legacy
 
@@ -190,8 +198,8 @@ bundle inventory drift, manifest required fields, allowed runtime
 kinds/categories, exported asset directory presence, parseable alias packs,
 parseable completion definitions, prompt preset segment references, and
 declarative keybinding metadata and theme TOML assets for exported packs, plus the Phase 9 authoring
-guide and templates. Source manifests must declare `shell:source` and a
-bundle-local `.winux` entry. Process manifests must be explicit opt-in and
+guide and templates. Source manifests must declare `shell:source`, supported
+lifecycle hooks, and a bundle-local `.winux` entry. Process manifests must be explicit opt-in and
 declare protocol, command, timeout, permissions, and required binaries. The package
 script builds `dist/oh-my-winuxsh-{version}.zip` plus a `.sha256` checksum when
 run without `--check`.

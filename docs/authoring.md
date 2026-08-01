@@ -121,9 +121,10 @@ Field rules:
 
 Use `kind = "source"` when a pack should behave like a traditional shell
 plugin. Winuxsh sources the declared `.winux` file into the current interactive
-session during REPL startup and the `-C` one-shot REPL path. Ordinary `-c`,
+session during REPL startup and declared lifecycle hooks. Ordinary `-c`,
 script-file, and stdin execution stay clean unless a future explicit opt-in is
-added.
+added; the `-C` one-shot REPL path loads the same interactive startup surface
+when the host supports it.
 
 ```toml
 [source]
@@ -134,8 +135,10 @@ Rules:
 
 - `permissions` must include `shell:source`.
 - `source.entry` must be a bundle-local relative path ending in `.winux`.
-- Source plugins may define aliases, functions, exports, and shell startup
-  glue, but plugin enablement and permissions remain in `~/.winshrc.toml`.
+- `exports.hooks` may contain `startup`, `precmd`, `preexec`, and `chpwd`.
+- Source plugins may define aliases, functions, exports, cwd-changing helpers,
+  and shell lifecycle glue, but plugin enablement and permissions remain in
+  `~/.winshrc.toml`.
 - User `~/.winshrc` runs after official source plugins, so user shell code can
   override plugin defaults.
 
@@ -212,7 +215,7 @@ Rules:
 | --- | --- | --- |
 | `cwd:read` | low | Reads the current working directory or path context. |
 | `env:read:<NAME>` | low | Reads one explicitly named environment variable. |
-| `shell:source` | high | Sources bundle-owned `.winux` code into the current interactive session. |
+| `shell:source` | high | Sources bundle-owned `.winux` code into the current interactive session and lifecycle hooks. |
 | `process:run:<cmd>` | high | Runs a native command such as `git` or `zoxide`. |
 | `shell:cwd:write` | medium | Requests a native cwd change through a host-owned shim. |
 | `env:write` | high | Requests environment variable changes. |

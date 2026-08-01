@@ -26,6 +26,7 @@ EXPORT_KEYS = {
 }
 REQUIRED_EXPORT_KEYS = EXPORT_KEYS - {"keybindings", "providers"}
 KNOWN_PROVIDER_EXPORTS = {"command-not-found"}
+SOURCE_PLUGIN_HOOKS = {"startup", "precmd", "preexec", "chpwd"}
 PROCESS_PLUGIN_PROTOCOL = "winuxsh:process-plugin@0.1.0"
 PROCESS_PLUGIN_MAX_TIMEOUT_MILLIS = 30_000
 WASM_PLUGIN_PROTOCOL = "winuxsh:wasm-plugin@0.1.0"
@@ -403,6 +404,14 @@ def validate_source_manifest(pack_name: str, manifest: dict, errors: list[str]) 
     permissions = manifest.get("permissions")
     if isinstance(permissions, list):
         expect("shell:source" in permissions, f"{pack_name}: source packs must declare shell:source", errors)
+    exports = manifest.get("exports")
+    if isinstance(exports, dict):
+        hooks = exports.get("hooks", [])
+        if isinstance(hooks, list):
+            for index, hook in enumerate(hooks):
+                expect(valid_manifest_token(hook), f"{pack_name}: exports.hooks[{index}] must be a non-empty single-line string", errors)
+                if valid_manifest_token(hook):
+                    expect(hook in SOURCE_PLUGIN_HOOKS, f"{pack_name}: source hook {hook!r} is not supported", errors)
 
 
 def validate_wasm_manifest(pack_name: str, manifest: dict, exports: dict, errors: list[str]) -> None:

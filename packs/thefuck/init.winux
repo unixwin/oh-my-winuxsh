@@ -1,0 +1,12 @@
+# oh-my-winuxsh thefuck plugin
+# Executes the correction returned by thefuck in the current shell.
+
+fuck() {
+  command -v thefuck >/dev/null 2>&1 || {
+    echo "thefuck is not installed or not on PATH" >&2
+    return 127
+  }
+
+  __winuxsh_thefuck_command=$(thefuck "$@") || return
+  [ -n "$__winuxsh_thefuck_command" ] && eval "$__winuxsh_thefuck_command"
+}

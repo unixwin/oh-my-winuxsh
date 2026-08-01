@@ -499,26 +499,24 @@ Winuxsh dependency:
   - env writes;
   - cwd writes;
   - lifecycle hook context.
+- Source lifecycle hooks for current-shell helpers that need aliases,
+  functions, env writes, cwd writes, or hook effects.
 - Process plugin behavior for tools where native process execution is the
-  point, such as `thefuck`, `direnv`, and `fzf`-style selectors.
+  point and no current-shell mutation is required.
 - Permission review that clearly distinguishes static assets, builtin host
   behavior, process execution, and sandboxed WASM execution.
 Candidate migration order:
-- Start with the implemented Winuxsh process binding for the
-  [command-not-found provider](command-not-found-provider-abi.md), keep the official pack builtin until migration is deliberate, then expand
-  to prompt segment calculators, completion providers, and formatting/suggestion
-  helpers after that provider shape is proven.
-- Move external-tool adapters through `process` when the plugin mostly invokes
-  an existing executable.
 - Move simple shell helper packs through `source` when the desired behavior is
-  aliases, functions, and startup glue in the current interactive shell.
-- Move shell-mutating helpers such as `zoxide`, `dotenv`, and lifecycle hooks
-  only after Winuxsh exposes explicit permissioned host APIs for env/cwd/file
-  mutation and deterministic failure behavior.
+  aliases, functions, startup glue, or lifecycle effects in the current
+  interactive shell.
+- Keep the implemented Winuxsh process binding for the
+  [command-not-found provider](command-not-found-provider-abi.md), and migrate
+  the official pack only when the provider behavior is deliberate.
+- Expand next to prompt segment calculators, completion providers, and
+  formatting/suggestion helpers after that provider shape is proven.
 Done when:
-- At least one non-fixture first-party pack ships as WASM or process instead of
-  `builtin`, or as `source` when shell startup behavior is the actual product
-  surface.
+- Non-fixture first-party shell-effect packs ship as `source` instead of
+  `builtin`.
 - Users can still put personal bash-like customization in `~/.winshrc`.
 - Distributed plugin code remains manifest-reviewed and does not become an
   arbitrary rc/source mechanism.

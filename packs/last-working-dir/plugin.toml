@@ -1,12 +1,12 @@
 name = "last-working-dir"
 bundle = "oh-my-winuxsh"
 version = "1.0.0"
-kind = "builtin"
+kind = "source"
 api = "winuxsh:plugin@0.1.0"
 category = "workflow"
 summary = "Last working directory cache and restore command."
 default = false
-permissions = ["cwd:read", "fs:read:cache", "fs:write:cache"]
+permissions = ["shell:source", "cwd:read", "shell:cwd:write", "fs:read:cache", "fs:write:cache"]
 required_binaries = []
 
 [exports]
@@ -17,3 +17,6 @@ hooks = ["startup", "chpwd"]
 commands = ["lwd"]
 keybindings = []
 themes = []
+
+[source]
+entry = "packs/last-working-dir/init.winux"

@@ -99,7 +99,8 @@ through the bundle update model.
 ## Runtime Kinds
 
 - `source`: bundle-local `.winux` scripts sourced into the current interactive
-  shell session during REPL startup and `-C`.
+  shell session during startup and declared `precmd`, `preexec`, or `chpwd`
+  lifecycle hooks.
 - `builtin`: first-party Rust implementations inside Winuxsh, mainly fallback
   and native adapters.
 - `wasm`: future third-party plugins through WASM/WASI. WASM packs declare a
@@ -109,7 +110,7 @@ through the bundle update model.
   simple command arguments, may read cwd when `cwd:read` is declared, and may
   read explicitly allowed env values when `env:read:<NAME>` is declared through
   the Phase 14-17 `winuxsh:plugin/host` imports; completions, prompt segments,
-  WASI, and shell-mutating APIs remain later host surfaces.
+  WASI, and shell-mutating WASM APIs remain later host surfaces.
 - `process`: compatibility and debugging adapters for existing tools. Process
   packs declare a protocol, command, arguments, timeout, and permissions in
   `[process]`; Winuxsh validates that contract before accepting the bundle and
@@ -136,21 +137,26 @@ Good early candidates for WASM are mostly pure providers:
 - completion providers;
 - command suggestion or formatting helpers.
 
-Good process candidates are adapters around existing executables or
-interactive tools:
+Good source candidates are trusted shell helpers that must mutate the current
+session:
 
-- `thefuck`;
+- `zoxide`;
 - `direnv`;
-- `fzf`-style selectors.
+- `dotenv`;
+- `fzf`-style selectors;
+- `last-working-dir`;
+- `thefuck`.
 
-Packs that mutate shell state need more host API before they can safely leave
-Winuxsh core:
+Good process candidates are adapters around existing executables that do not
+need current-shell env/cwd mutation.
 
-- `zoxide` needs cwd read/write and directory tracking state;
-- `dotenv` needs scoped file reads and env writes;
-- lifecycle hooks need stable startup/precmd/preexec/chpwd context;
-- any pack that changes env, cwd, aliases, or prompt state needs explicit
-  permission tokens and deterministic failure behavior.
+Packs that mutate shell state outside trusted source still need more host API
+before they can safely become WASM/provider plugins:
+
+- structured env and cwd effects;
+- scoped file effects;
+- startup/precmd/preexec/chpwd context;
+- deterministic failure and rollback behavior.
 
 Keep core shell machinery inside Winuxsh:
 
