@@ -3,16 +3,14 @@
 `oh-my-winuxsh` is the official bundled plugin distribution for Winuxsh.
 The execution sequence lives in [roadmap.md](roadmap.md).
 
-It intentionally does not source shell scripts. It provides versioned manifest
-metadata and bundled assets that Winuxsh can load through its own plugin
-registry.
+It follows the normal shell-plugin model where trusted plugin code can be
+sourced into the current interactive session, while keeping manifests,
+permissions, bundle updates, and rollback in Winuxsh-owned metadata.
 
-This can look strange compared with Oh My Zsh or traditional bash plugin
-collections, because many of those ecosystems treat "plugin" as "an rc script
-that gets sourced." `oh-my-winuxsh` does not use that model. It is currently
-TOML-heavy by design because the first supported surface is a reviewable bundle
-of manifests and static assets. Code-bearing plugins are expected to use an
-explicit Winuxsh runtime contract, not arbitrary sourced shell code.
+This is intentionally closer to Oh My Zsh and bash plugin collections than the
+earlier TOML-only plan. Static data still lives in TOML assets, but code-bearing
+first-party shell plugins now use bundle-local `.winux` files declared through
+`kind = "source"`.
 
 ## Bundle Layout
 
@@ -20,6 +18,8 @@ explicit Winuxsh runtime contract, not arbitrary sourced shell code.
   asset directory names.
 - `packs/<name>/plugin.toml` declares each first-party pack's runtime kind,
   permissions, exports, defaults, and required binaries.
+- `packs/<name>/init.winux` contains sourced Winuxsh shell code for
+  `kind = "source"` packs.
 - `aliases/`, `completions/`, `prompts/`, and `keybindings/` are asset
   directories. `aliases/*.toml` owns first-party alias tables,
   `completions/*.toml` owns native completion definitions,
@@ -27,8 +27,8 @@ explicit Winuxsh runtime contract, not arbitrary sourced shell code.
   `keybindings/*.toml` owns declarative metadata for native editor actions.
 - Winuxsh keeps compiled fallbacks so bundled releases work offline even before
   independent bundle updates exist.
-- `docs/authoring.md` and `templates/` define the public Phase 9 authoring
-  surface for builtin, process, and WASM pack manifests.
+- `docs/authoring.md` and `templates/` define the public authoring surface for
+  source, builtin, process, and WASM pack manifests.
 
 ## Why TOML First
 
@@ -43,9 +43,9 @@ questions that should be auditable before code runs:
   hooks it exports;
 - which external binaries or artifacts are required.
 
-Packs that only need static data can be pure TOML. Packs that need behavior
-must use one of the runtime kinds below. This keeps user-authored rc code and
-distributed plugin code from collapsing into the same trust bucket.
+Packs that only need static data can be pure TOML. Packs that need shell
+behavior should usually start as `source` packs. Process and WASM remain
+available for external-tool adapters and sandboxed providers.
 
 Use [Externalization Readiness](externalization-readiness.md) before changing
 pack schemas. The bundle should classify asset-only packs, mixed native packs,
@@ -98,15 +98,19 @@ through the bundle update model.
 
 ## Runtime Kinds
 
-- `builtin`: first-party Rust implementations inside Winuxsh.
+- `source`: bundle-local `.winux` scripts sourced into the current interactive
+  shell session during startup and declared `precmd`, `preexec`, or `chpwd`
+  lifecycle hooks.
+- `builtin`: first-party Rust implementations inside Winuxsh, mainly fallback
+  and native adapters.
 - `wasm`: future third-party plugins through WASM/WASI. WASM packs declare a
   protocol, module path, SHA-256, WIT world, timeout, and memory cap in
-  `[wasm]`. Current command fixtures run in the Winuxsh wasmi host when enabled,
+  `[wasm]`. Current command modules run in the Winuxsh wasmi host when enabled,
   export `winuxsh_plugin_main() -> i32`, may write stdout/stderr, may read
   simple command arguments, may read cwd when `cwd:read` is declared, and may
   read explicitly allowed env values when `env:read:<NAME>` is declared through
   the Phase 14-17 `winuxsh:plugin/host` imports; completions, prompt segments,
-  WASI, and shell-mutating APIs remain later host surfaces.
+  WASI, and shell-mutating WASM APIs remain later host surfaces.
 - `process`: compatibility and debugging adapters for existing tools. Process
   packs declare a protocol, command, arguments, timeout, and permissions in
   `[process]`; Winuxsh validates that contract before accepting the bundle and
@@ -133,21 +137,26 @@ Good early candidates for WASM are mostly pure providers:
 - completion providers;
 - command suggestion or formatting helpers.
 
-Good process candidates are adapters around existing executables or
-interactive tools:
+Good source candidates are trusted shell helpers that must mutate the current
+session:
 
-- `thefuck`;
+- `zoxide`;
 - `direnv`;
-- `fzf`-style selectors.
+- `dotenv`;
+- `fzf`-style selectors;
+- `last-working-dir`;
+- `thefuck`.
 
-Packs that mutate shell state need more host API before they can safely leave
-Winuxsh core:
+Good process candidates are adapters around existing executables that do not
+need current-shell env/cwd mutation.
 
-- `zoxide` needs cwd read/write and directory tracking state;
-- `dotenv` needs scoped file reads and env writes;
-- lifecycle hooks need stable startup/precmd/preexec/chpwd context;
-- any pack that changes env, cwd, aliases, or prompt state needs explicit
-  permission tokens and deterministic failure behavior.
+Packs that mutate shell state outside trusted source still need more host API
+before they can safely become WASM/provider plugins:
+
+- structured env and cwd effects;
+- scoped file effects;
+- startup/precmd/preexec/chpwd context;
+- deterministic failure and rollback behavior.
 
 Keep core shell machinery inside Winuxsh:
 

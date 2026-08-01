@@ -4,8 +4,9 @@ This roadmap is synchronized with Winuxsh's plugin-system roadmap. Phase numbers
 must stay aligned with `DOCS/plugin-system-roadmap.md` in the Winuxsh repo.
 
 `oh-my-winuxsh` is the official bundled plugin distribution for Winuxsh. It is
-not an Oh My Zsh fork, not a zsh plugin runtime, and not a sourced shell script
-framework.
+not an Oh My Zsh fork, not a zsh plugin runtime, and not the legacy `.winsh`
+script framework. It can ship reviewed bundle-local `.winux` source packs
+through the Winuxsh manifest/permission model.
 
 ## Phase 0 - Repository Reset
 
@@ -93,7 +94,8 @@ oh-my-winuxsh work:
   - `prompts/`;
   - `keybindings/`.
 - Split data assets from manifests.
-- Mark which packs are pure metadata and which need Winuxsh builtin code.
+- Mark which packs are pure metadata, which use `.winux` source helpers, and
+  which still need Winuxsh builtin code.
 - Add tests that exported assets exist.
 
 Winuxsh dependency:
@@ -101,9 +103,9 @@ Winuxsh dependency:
 - Done in the paired Winuxsh branch:
   - effective plugin state resolves `[plugins]`, bundle defaults, and legacy
     migration reads;
-  - `git` enables/disables the existing builtin alias pack;
-  - `docker`, `kubectl`, and `npm` alias packs activate from canonical
-    `[plugins]` state through Winuxsh's compiled fallback data;
+  - `git` enables/disables the official source/assets pack;
+  - `docker`, `kubectl`, and `npm` source/assets packs activate from canonical
+    `[plugins]` state with Winuxsh compiled fallback data where needed;
   - `zoxide` and other existing builtin shims can be activated from
     canonical `[plugins]` state;
   - explicit `keybindings` disable blocks legacy native widget presets and
@@ -210,8 +212,8 @@ oh-my-winuxsh work:
 Current branch progress:
 
 - `aliases/git.toml`, `aliases/docker.toml`, `aliases/kubectl.toml`, and
-  `aliases/npm.toml` now own the first-party alias tables for builtin alias
-  packs.
+  `aliases/npm.toml` now own the first-party alias tables for the devtool
+  source/assets packs.
 - `tools/validate_bundle.py` checks that every pack with `exports.aliases = true`
   has a parseable non-empty `aliases/<pack>.toml` file.
 - The paired Winuxsh branch loads active bundle aliases before compiled fallback
@@ -246,24 +248,21 @@ Done when:
 - A bundle release can update a first-party completion, prompt preset, or
   keybinding metadata file without replacing Winuxsh itself.
 
-## Phase 7 - Process Plugin Fixtures
+## Phase 7 - Process Plugin Runtime
 
-Status: implemented on this branch.
+Status: host contract documented; no official fixture pack is shipped.
 
 oh-my-winuxsh work:
 
-- Add process plugin examples only after the host contract exists.
+- Add process plugin examples only when they are real user-facing packs.
 - Mark every process pack explicit opt-in.
 - Document timeouts and failure behavior.
 
 Current branch progress:
 
-- `packs/process-echo/plugin.toml` is the explicit opt-in process command
-  fixture.
-- `packs/process-hook/plugin.toml` is the explicit opt-in process lifecycle
-  hook fixture.
-- Both fixtures declare `[process]` with protocol
-  `winuxsh:process-plugin@0.1.0`, command, args, and timeout metadata.
+- The official bundle does not ship process-only test packs.
+- Winuxsh host tests keep process command and lifecycle fixtures in generated
+  test bundles instead of exposing them as official plugins.
 - `tools/validate_bundle.py` now rejects process packs that are default-enabled,
   omit `[process]`, omit `process:run:<command>`, exceed timeout bounds, or
   fail to export at least one command/hook.
@@ -280,28 +279,26 @@ Done when:
 - Process manifests use the same schema as builtin manifests.
 - A failed or timed-out process plugin cannot corrupt shell state.
 
-## Phase 8 - WASM Host Fixtures
+## Phase 8 - WASM Host Runtime
 
-Status: command execution fixture implemented on this branch.
+Status: host contract documented; no official WASM demo pack is shipped.
 
 oh-my-winuxsh work:
 
-- Add a small WASM example only as a host API fixture.
-- Keep official first-party packs builtin unless WASM adds real distribution
+- Add a WASM pack only when it provides real sandbox/provider distribution
   value.
+- Keep official first-party packs as `source` or `builtin` unless WASM adds
+  real sandbox/provider distribution value.
 - Document WASM permission requirements.
 
 Current branch progress:
 
-- Added `packs/wasm-hello/plugin.toml` as an explicit opt-in WASM host API
-  fixture.
+- The official bundle does not ship WASM-only test packs.
+- Winuxsh host tests keep WASM command fixtures in generated test bundles
+  instead of exposing them as official plugins.
 - The validator rejects WASM packs that are default-enabled, omit `[wasm]`, use
   native `process:run:*` permissions, declare native required binaries, export
   lifecycle hooks, or exceed timeout/memory bounds.
-- The fixture includes `wasm/wasm-hello.wasm`, its checked SHA-256, and a
-  reviewable `wasm/wasm-hello.wat` source file.
-- `wasm-hello` exports `winuxsh_plugin_main() -> i32`, matching the current
-  Winuxsh command host contract.
 
 Winuxsh dependency:
 
@@ -371,7 +368,8 @@ oh-my-winuxsh work:
 - Keep the legacy tag/branch for history.
 - Keep docs clear that the active bundle does not source zsh or `.winsh`
   plugins.
-- Remove any remaining active-surface references to sourced plugin scripts.
+- Remove any remaining active-surface references to arbitrary sourced plugin
+  scripts; keep only reviewed `.winux` source packs.
 
 Current branch progress:
 
@@ -380,7 +378,7 @@ Current branch progress:
 - README, design, authoring, and compatibility docs present the manifest-first
   Winuxsh plugin model as the active surface.
 - Remaining zsh and `.winsh` references are confined to migration, non-goals, or
-  legacy preservation notes.
+  legacy preservation notes. First-party shell helpers now use `.winux`.
 
 Winuxsh dependency:
 
@@ -464,9 +462,10 @@ Done when:
 Status: proposed direction; this describes where the bundle should go after the
 current TOML-first foundation.
 The active bundle is not meant to stay limited to aliases and static metadata.
-It is TOML-heavy today because many first-party packs are `builtin` packs whose
-behavior still lives in Winuxsh. That is a transitional shape, not the final
-definition of a plugin ecosystem.
+It is still TOML-heavy today because static assets and host-owned behavior are
+kept declarative, but first-party shell helper behavior can now move into
+`kind = "source"` packs with bundle-local `.winux` code. That is a transitional
+shape, not the final definition of a plugin ecosystem.
 The immediate gate is [Externalization Readiness](externalization-readiness.md):
 classify every pack before changing manifest schema or moving behavior into
 WASM/process artifacts.
@@ -480,36 +479,38 @@ oh-my-winuxsh work:
 - Treat these asset/declarative packs separately from host-owned builtin
   behavior even while manifests still use today's schema.
 - Add code-bearing pack artifacts only through explicit runtime contracts:
+  - `.winux` source scripts for reviewed shell helpers;
   - WASM modules for sandboxed providers and commands;
   - process manifests for adapters around existing native tools.
-- Do not add sourced shell-script plugins or require users to source bundle
-  files from `~/.winshrc`.
+- Do not add arbitrary zsh, legacy `.winsh`, or user-discovered rc source
+  plugins, and do not require users to source bundle files from `~/.winshrc`.
 - Document every code-bearing pack's permissions, host API surface, timeout,
   resource limit, and rollback behavior before making it a normal pack.
 Winuxsh dependency:
-- WASM host APIs for more than command fixtures:
+- WASM host APIs for more than command modules:
   - completion/provider output;
   - prompt segment output;
   - scoped file reads;
   - env writes;
   - cwd writes;
   - lifecycle hook context.
+- Source lifecycle hooks for current-shell helpers that need aliases,
+  functions, env writes, cwd writes, or hook effects.
 - Process plugin behavior for tools where native process execution is the
-  point, such as `thefuck`, `direnv`, and `fzf`-style selectors.
+  point and no current-shell mutation is required.
 - Permission review that clearly distinguishes static assets, builtin host
   behavior, process execution, and sandboxed WASM execution.
 Candidate migration order:
-- Start with the implemented Winuxsh process binding for the
-  [command-not-found provider](command-not-found-provider-abi.md), keep the official pack builtin until migration is deliberate, then expand
-  to prompt segment calculators, completion providers, and formatting/suggestion
-  helpers after that provider shape is proven.
-- Move external-tool adapters through `process` when the plugin mostly invokes
-  an existing executable.
-- Move shell-mutating helpers such as `zoxide`, `dotenv`, and lifecycle hooks
-  only after Winuxsh exposes explicit permissioned host APIs for env/cwd/file
-  mutation and deterministic failure behavior.
+- Move simple shell helper packs through `source` when the desired behavior is
+  aliases, functions, startup glue, or lifecycle effects in the current
+  interactive shell.
+- Keep the implemented Winuxsh process binding for the
+  [command-not-found provider](command-not-found-provider-abi.md), and migrate
+  the official pack only when the provider behavior is deliberate.
+- Expand next to prompt segment calculators, completion providers, and
+  formatting/suggestion helpers after that provider shape is proven.
 Done when:
-- At least one non-fixture first-party pack ships as WASM or process instead of
+- First-party shell-effect packs ship as `source` instead of
   `builtin`.
 - Users can still put personal bash-like customization in `~/.winshrc`.
 - Distributed plugin code remains manifest-reviewed and does not become an

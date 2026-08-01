@@ -11,14 +11,17 @@ anything.
   is not the whole future plugin universe; third-party registries should use
   the same manifest/index contract and be validated by Winuxsh host policy.
 - The current local update command accepts only the `oh-my-winuxsh` bundle name.
-- `builtin` packs are first-party only because the Rust implementation lives in
-  Winuxsh core.
+- `source` packs are the Oh My-style shell plugin path. They ship bundle-local
+  `.winux` code that Winuxsh sources into the current interactive session after
+  plugin review and enablement.
+- `builtin` packs are first-party fallback/native adapters because the Rust
+  implementation lives in Winuxsh core.
 - `process` packs are explicit opt-in adapters for existing native tools.
 - `wasm` packs are the preferred third-party direction. Current command modules
   export `winuxsh_plugin_main() -> i32` and may use the Phase 14-17
   `winuxsh:plugin/host` stdout/stderr, args, cwd, and env read imports.
-- Shell-mutating WASM APIs, arbitrary zsh source, ZLE widgets, DLL/FFI plugin
-  ABIs, and sourced script plugins are outside the current public contract.
+- Shell-mutating WASM APIs, arbitrary zsh source, ZLE widgets, and DLL/FFI
+  plugin ABIs are outside the current public contract.
 
 ## Authoring Loop
 
@@ -26,7 +29,8 @@ anything.
 2. Add the pack name to `bundle.toml` under `[packs].available`.
 3. Put the manifest at `packs/<name>/plugin.toml`.
 4. Add any exported assets under `aliases/`, `completions/`, `prompts/`,
-   `keybindings/`, `themes/`, or `wasm/`.
+   `keybindings/`, `themes/`, or `wasm/`; source packs also add
+   `packs/<name>/init.winux`.
 5. Run the CI-safe checks:
 
 ```sh
@@ -73,12 +77,12 @@ Every `packs/<name>/plugin.toml` must include:
 name = "example"
 bundle = "oh-my-winuxsh"
 version = "1.0.0"
-kind = "builtin" # builtin | process | wasm
+kind = "source" # asset/static data may still use builtin fallback; runtime kinds include source | builtin | process | wasm
 api = "winuxsh:plugin@0.1.0"
 category = "workflow" # devtools | environment | workflow | hints | ux
 summary = "Short user-facing summary."
 default = false
-permissions = ["cwd:read"]
+permissions = ["shell:source"]
 required_binaries = []
 
 [exports]
@@ -99,8 +103,8 @@ Field rules:
 - `bundle` must match `bundle.toml` while this repository is the active
   reference bundle.
 - `api` must be `winuxsh:plugin@0.1.0` until the host bumps the contract.
-- `default = true` is only allowed for first-party builtin packs that are safe
-  without extra tools.
+- `default = true` is only allowed for first-party packs that are safe without
+  surprising startup side effects.
 - `permissions` must exactly describe pack behavior.
 - `required_binaries` lists native commands the user must have in `PATH`.
 - `exports` declares the surfaces Winuxsh may load. Declaring an export also
@@ -112,6 +116,31 @@ Field rules:
   providers until a separate WASM provider ABI exists.
 
 ## Runtime Contracts
+
+### Source
+
+Use `kind = "source"` when a pack should behave like a traditional shell
+plugin. Winuxsh sources the declared `.winux` file into the current interactive
+session during REPL startup and declared lifecycle hooks. Ordinary `-c`,
+script-file, and stdin execution stay clean unless a future explicit opt-in is
+added; the `-C` one-shot REPL path loads the same interactive startup surface
+when the host supports it.
+
+```toml
+[source]
+entry = "packs/example/init.winux"
+```
+
+Rules:
+
+- `permissions` must include `shell:source`.
+- `source.entry` must be a bundle-local relative path ending in `.winux`.
+- `exports.hooks` may contain `startup`, `precmd`, `preexec`, and `chpwd`.
+- Source plugins may define aliases, functions, exports, cwd-changing helpers,
+  and shell lifecycle glue, but plugin enablement and permissions remain in
+  `~/.winshrc.toml`.
+- User `~/.winshrc` runs after official source plugins, so user shell code can
+  override plugin defaults.
 
 ### Builtin
 
@@ -186,6 +215,7 @@ Rules:
 | --- | --- | --- |
 | `cwd:read` | low | Reads the current working directory or path context. |
 | `env:read:<NAME>` | low | Reads one explicitly named environment variable. |
+| `shell:source` | high | Sources bundle-owned `.winux` code into the current interactive session and lifecycle hooks. |
 | `process:run:<cmd>` | high | Runs a native command such as `git` or `zoxide`. |
 | `shell:cwd:write` | medium | Requests a native cwd change through a host-owned shim. |
 | `env:write` | high | Requests environment variable changes. |

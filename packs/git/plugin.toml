@@ -1,12 +1,12 @@
 name = "git"
 bundle = "oh-my-winuxsh"
 version = "1.0.0"
-kind = "builtin"
+kind = "source"
 api = "winuxsh:plugin@0.1.0"
 category = "devtools"
 summary = "Git aliases, completions, and prompt segments."
 default = true
-permissions = ["cwd:read", "process:run:git"]
+permissions = ["shell:source", "cwd:read", "process:run:git"]
 required_binaries = ["git"]
 
 [exports]
@@ -17,6 +17,9 @@ hooks = []
 commands = []
 keybindings = []
 themes = []
+
+[source]
+entry = "packs/git/init.winux"
 
 [settings]
 show_dirty = true

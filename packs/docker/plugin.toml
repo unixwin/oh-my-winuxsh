@@ -1,12 +1,12 @@
 name = "docker"
 bundle = "oh-my-winuxsh"
 version = "1.0.0"
-kind = "builtin"
+kind = "source"
 api = "winuxsh:plugin@0.1.0"
 category = "devtools"
 summary = "Docker aliases and completion hints."
 default = false
-permissions = ["cwd:read", "process:run:docker"]
+permissions = ["shell:source", "cwd:read", "process:run:docker"]
 required_binaries = ["docker"]
 
 [exports]
@@ -17,3 +17,6 @@ hooks = []
 commands = []
 keybindings = []
 themes = []
+
+[source]
+entry = "packs/docker/init.winux"

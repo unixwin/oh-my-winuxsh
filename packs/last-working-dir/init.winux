@@ -1,0 +1,31 @@
+# oh-my-winuxsh last-working-dir plugin
+# Restores the last directory at startup and records it after cd.
+
+__winuxsh_lwd_cache_dir=${WINUXSH_CACHE_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/winuxsh}
+__winuxsh_lwd_cache_file=${WINUXSH_LAST_WORKING_DIR_FILE:-$__winuxsh_lwd_cache_dir/last-working-dir}
+
+__winuxsh_lwd_restore() {
+  [ -f "$__winuxsh_lwd_cache_file" ] || return 0
+  IFS= read -r __winuxsh_lwd_target < "$__winuxsh_lwd_cache_file" || return 0
+  [ -n "$__winuxsh_lwd_target" ] && [ -d "$__winuxsh_lwd_target" ] && cd "$__winuxsh_lwd_target"
+}
+
+__winuxsh_lwd_save() {
+  mkdir -p "$__winuxsh_lwd_cache_dir" 2>/dev/null || return 0
+  printf '%s\n' "$PWD" > "$__winuxsh_lwd_cache_file"
+}
+
+lwd() {
+  if [ -f "$__winuxsh_lwd_cache_file" ]; then
+    cat "$__winuxsh_lwd_cache_file"
+  fi
+}
+
+case "$WINUXSH_PLUGIN_HOOK" in
+  startup)
+    __winuxsh_lwd_restore
+    ;;
+  chpwd)
+    __winuxsh_lwd_save
+    ;;
+esac

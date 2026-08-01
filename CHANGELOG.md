@@ -9,14 +9,14 @@ changes, and user-visible asset changes.
 ### Added
 
 - Established the repository as the official Winuxsh plugin bundle rather than
-  a sourced `.winsh` script framework.
+  a legacy `.winsh` script framework.
 - Added bundle metadata with `api = "winuxsh:plugin-bundle@0.1.0"` and
   `min_winuxsh = "0.8.3"`.
-- Added first-party builtin packs for Git, Docker, kubectl, npm, zoxide,
-  direnv, dotenv, fzf, command-not-found, last-working-dir, thefuck, prompts,
-  and keybindings.
-- Added explicit opt-in process fixture packs and a no-import WASM command
-  fixture for host-side runtime validation.
+- Added first-party source packs for Git, Docker, kubectl, npm, zoxide,
+  direnv, dotenv, fzf, last-working-dir, and thefuck with bundle-local `.winux`
+  startup and lifecycle hook code.
+- Added first-party builtin/native packs for command-not-found, prompts, and
+  keybindings where host-owned provider/editor/prompt behavior still applies.
 - Added bundle-owned aliases, completions, prompt presets, keybinding metadata,
   official theme assets, authoring templates, and public authoring documentation.
 - Added deterministic release packaging for `oh-my-winuxsh-1.0.0.zip` and the
@@ -29,8 +29,8 @@ changes, and user-visible asset changes.
 - Uses pack manifest API `winuxsh:plugin@0.1.0`, process plugin protocol
   `winuxsh:process-plugin@0.1.0`, and WASM plugin protocol
   `winuxsh:wasm-plugin@0.1.0`.
-- Keeps process and WASM packs explicit opt-in because they can execute outside
-  pure static asset loading.
+- Keeps source, process, and WASM execution visible through manifest
+  permissions because they can execute outside pure static asset loading.
 
 ### Release Checklist
 

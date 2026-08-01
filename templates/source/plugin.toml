@@ -1,22 +1,23 @@
-name = "dotenv"
+name = "example-source"
 bundle = "oh-my-winuxsh"
 version = "1.0.0"
 kind = "source"
 api = "winuxsh:plugin@0.1.0"
-category = "environment"
-summary = "Safe .env loader on Winuxsh lifecycle hooks."
+category = "workflow"
+summary = "Source plugin pack template."
 default = false
-permissions = ["shell:source", "cwd:read", "fs:read:.env", "env:write"]
+permissions = ["shell:source"]
 required_binaries = []
 
 [exports]
 aliases = false
 completions = []
 prompt_segments = []
-hooks = ["startup", "precmd", "chpwd"]
+hooks = ["startup", "precmd", "preexec", "chpwd"]
 commands = []
 keybindings = []
 themes = []
+providers = []
 
 [source]
-entry = "packs/dotenv/init.winux"
+entry = "packs/example-source/init.winux"

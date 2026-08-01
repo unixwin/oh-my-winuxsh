@@ -1,12 +1,12 @@
 name = "kubectl"
 bundle = "oh-my-winuxsh"
 version = "1.0.0"
-kind = "builtin"
+kind = "source"
 api = "winuxsh:plugin@0.1.0"
 category = "devtools"
 summary = "Kubectl aliases and completion hints."
 default = false
-permissions = ["cwd:read", "process:run:kubectl"]
+permissions = ["shell:source", "cwd:read", "process:run:kubectl"]
 required_binaries = ["kubectl"]
 
 [exports]
@@ -17,3 +17,6 @@ hooks = []
 commands = []
 keybindings = []
 themes = []
+
+[source]
+entry = "packs/kubectl/init.winux"
