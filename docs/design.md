@@ -105,7 +105,7 @@ through the bundle update model.
   and native adapters.
 - `wasm`: future third-party plugins through WASM/WASI. WASM packs declare a
   protocol, module path, SHA-256, WIT world, timeout, and memory cap in
-  `[wasm]`. Current command fixtures run in the Winuxsh wasmi host when enabled,
+  `[wasm]`. Current command modules run in the Winuxsh wasmi host when enabled,
   export `winuxsh_plugin_main() -> i32`, may write stdout/stderr, may read
   simple command arguments, may read cwd when `cwd:read` is declared, and may
   read explicitly allowed env values when `env:read:<NAME>` is declared through

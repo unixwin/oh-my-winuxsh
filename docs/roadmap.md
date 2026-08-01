@@ -248,24 +248,21 @@ Done when:
 - A bundle release can update a first-party completion, prompt preset, or
   keybinding metadata file without replacing Winuxsh itself.
 
-## Phase 7 - Process Plugin Fixtures
+## Phase 7 - Process Plugin Runtime
 
-Status: implemented on this branch.
+Status: host contract documented; no official fixture pack is shipped.
 
 oh-my-winuxsh work:
 
-- Add process plugin examples only after the host contract exists.
+- Add process plugin examples only when they are real user-facing packs.
 - Mark every process pack explicit opt-in.
 - Document timeouts and failure behavior.
 
 Current branch progress:
 
-- `packs/process-echo/plugin.toml` is the explicit opt-in process command
-  fixture.
-- `packs/process-hook/plugin.toml` is the explicit opt-in process lifecycle
-  hook fixture.
-- Both fixtures declare `[process]` with protocol
-  `winuxsh:process-plugin@0.1.0`, command, args, and timeout metadata.
+- The official bundle does not ship process-only test packs.
+- Winuxsh host tests keep process command and lifecycle fixtures in generated
+  test bundles instead of exposing them as official plugins.
 - `tools/validate_bundle.py` now rejects process packs that are default-enabled,
   omit `[process]`, omit `process:run:<command>`, exceed timeout bounds, or
   fail to export at least one command/hook.
@@ -282,28 +279,26 @@ Done when:
 - Process manifests use the same schema as builtin manifests.
 - A failed or timed-out process plugin cannot corrupt shell state.
 
-## Phase 8 - WASM Host Fixtures
+## Phase 8 - WASM Host Runtime
 
-Status: command execution fixture implemented on this branch.
+Status: host contract documented; no official WASM demo pack is shipped.
 
 oh-my-winuxsh work:
 
-- Add a small WASM example only as a host API fixture.
+- Add a WASM pack only when it provides real sandbox/provider distribution
+  value.
 - Keep official first-party packs as `source` or `builtin` unless WASM adds
   real sandbox/provider distribution value.
 - Document WASM permission requirements.
 
 Current branch progress:
 
-- Added `packs/wasm-hello/plugin.toml` as an explicit opt-in WASM host API
-  fixture.
+- The official bundle does not ship WASM-only test packs.
+- Winuxsh host tests keep WASM command fixtures in generated test bundles
+  instead of exposing them as official plugins.
 - The validator rejects WASM packs that are default-enabled, omit `[wasm]`, use
   native `process:run:*` permissions, declare native required binaries, export
   lifecycle hooks, or exceed timeout/memory bounds.
-- The fixture includes `wasm/wasm-hello.wasm`, its checked SHA-256, and a
-  reviewable `wasm/wasm-hello.wat` source file.
-- `wasm-hello` exports `winuxsh_plugin_main() -> i32`, matching the current
-  Winuxsh command host contract.
 
 Winuxsh dependency:
 
@@ -492,7 +487,7 @@ oh-my-winuxsh work:
 - Document every code-bearing pack's permissions, host API surface, timeout,
   resource limit, and rollback behavior before making it a normal pack.
 Winuxsh dependency:
-- WASM host APIs for more than command fixtures:
+- WASM host APIs for more than command modules:
   - completion/provider output;
   - prompt segment output;
   - scoped file reads;
@@ -515,7 +510,7 @@ Candidate migration order:
 - Expand next to prompt segment calculators, completion providers, and
   formatting/suggestion helpers after that provider shape is proven.
 Done when:
-- Non-fixture first-party shell-effect packs ship as `source` instead of
+- First-party shell-effect packs ship as `source` instead of
   `builtin`.
 - Users can still put personal bash-like customization in `~/.winshrc`.
 - Distributed plugin code remains manifest-reviewed and does not become an

@@ -133,39 +133,6 @@ permissions = ["shell:source", "history:read", "shell:execute:suggested-command"
 required_binaries = ["thefuck"]
 
 [[packs]]
-name = "process-echo"
-version = "1.0.0"
-api = "winuxsh:plugin@0.1.0"
-kind = "process"
-category = "workflow"
-summary = "Process plugin host contract fixture."
-default = false
-permissions = ["cwd:read", "process:run:winuxsh-process-echo"]
-required_binaries = ["winuxsh-process-echo"]
-
-[[packs]]
-name = "process-hook"
-version = "1.0.0"
-api = "winuxsh:plugin@0.1.0"
-kind = "process"
-category = "workflow"
-summary = "Process plugin lifecycle hook contract fixture."
-default = false
-permissions = ["cwd:read", "process:run:winuxsh-process-hook"]
-required_binaries = ["winuxsh-process-hook"]
-
-[[packs]]
-name = "wasm-hello"
-version = "1.0.0"
-api = "winuxsh:plugin@0.1.0"
-kind = "wasm"
-category = "workflow"
-summary = "WASM host API contract fixture."
-default = false
-permissions = ["cwd:read"]
-required_binaries = []
-
-[[packs]]
 name = "keybindings"
 version = "1.0.0"
 api = "winuxsh:plugin@0.1.0"

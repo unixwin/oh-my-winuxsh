@@ -39,9 +39,6 @@ behavior out of `builtin`. It records when a pack belongs in `source`,
 | `keybindings` | `builtin` | Declarative asset | Asset-only/declarative; schema marker TBD | Asset-only schema decision; reedline actions stay native | No | Minimal |
 | `prompts` | `builtin` | Mixed declarative/native | Declarative prompt presets plus native segments until prompt provider ABI | Prompt segment provider ABI | No | Yes |
 | `themes` | `builtin` | Declarative asset | Asset-only/declarative; schema marker TBD | Asset-only schema decision; renderer stays native | No | Minimal |
-| `process-echo` | `process` | Fixture | Process command fixture | None for fixture scope | No | No |
-| `process-hook` | `process` | Fixture | Process hook fixture; not a generic effect runtime | Structured hook effects before normal use | No in fixture | No |
-| `wasm-hello` | `wasm` | Fixture | WASM command fixture; provider/effect ABI is separate | Provider/effect ABI is separate future work | No | No |
 ## Next Bundle Work
 1. Use `kind = "source"` for reviewed first-party shell helpers whose value is
    current-session shell code.

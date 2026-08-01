@@ -17,8 +17,6 @@ changes, and user-visible asset changes.
   startup and lifecycle hook code.
 - Added first-party builtin/native packs for command-not-found, prompts, and
   keybindings where host-owned provider/editor/prompt behavior still applies.
-- Added explicit opt-in process fixture packs and a no-import WASM command
-  fixture for host-side runtime validation.
 - Added bundle-owned aliases, completions, prompt presets, keybinding metadata,
   official theme assets, authoring templates, and public authoring documentation.
 - Added deterministic release packaging for `oh-my-winuxsh-1.0.0.zip` and the

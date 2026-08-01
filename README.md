@@ -77,9 +77,6 @@ oh-my-winuxsh/
     last-working-dir/init.winux
     thefuck/plugin.toml
     thefuck/init.winux
-    process-echo/plugin.toml
-    process-hook/plugin.toml
-    wasm-hello/plugin.toml
     keybindings/plugin.toml
     prompts/plugin.toml
   aliases/
@@ -108,9 +105,6 @@ oh-my-winuxsh/
     minimal.toml
     ocean.toml
     README.md
-  wasm/
-    wasm-hello.wasm
-    wasm-hello.wat
   docs/
     authoring.md
     design.md
@@ -139,9 +133,6 @@ oh-my-winuxsh/
 | `command-not-found` | Interactive missing-command hints | Off |
 | `last-working-dir` | `.winux` last-directory cache and restore hooks | Off |
 | `thefuck` | `.winux` correction shim for the previous command | Off |
-| `process-echo` | Process plugin host contract fixture | Off |
-| `process-hook` | Process plugin lifecycle hook contract fixture | Off |
-| `wasm-hello` | WASM host API contract fixture | Off |
 | `keybindings` | Winuxsh keybinding presets, not ZLE support | On |
 | `prompts` | Prompt presets and segment defaults | On |
 | `themes` | Official prompt and Git status color themes | On |
@@ -206,7 +197,7 @@ run without `--check`.
 WASM manifests must also declare a bundle-local `.wasm` module path and SHA-256;
 the validator checks that the artifact exists, matches the digest, and has a
 valid WASM binary header. The current Winuxsh host can execute explicit command
-fixtures that export `winuxsh_plugin_main() -> i32`, may write stdout/stderr,
+modules that export `winuxsh_plugin_main() -> i32`, may write stdout/stderr,
 may read simple command arguments, read cwd when `cwd:read` is declared, and
 read explicitly permitted env values through `env:read:<NAME>` using the Phase
 14-17 `winuxsh:plugin/host` imports; broader WASI and
@@ -220,7 +211,6 @@ winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.0.zip --checks
 winuxsh plugin bundle status
 winuxsh plugin search workflow
 winuxsh plugin doctor
-winuxsh plugin review wasm-hello
 winuxsh plugin search workflow
 ```
 
