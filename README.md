@@ -12,9 +12,11 @@ This branch rebuilds the repository for the current Winuxsh architecture:
 
 - Winuxsh owns the shell frontend, config, plugin registry, and permission model.
 - `oh-my-winuxsh` provides official plugin manifests and bundled assets.
-- Existing first-party behavior starts as `kind = "builtin"` packs in winuxsh.
-- Future third-party plugins should use the same manifest model, with WASM/WASI
-  as the preferred runtime once the host API is stable.
+- First-party shell plugins can ship `.winux` startup code through
+  `kind = "source"`, close to the Oh My Zsh model but gated by manifests and
+  permission review.
+- Future sandboxed third-party providers can use the same manifest model, with
+  WASM/WASI as the preferred runtime once the host API is stable.
 
 ## Bundle Model
 
@@ -37,7 +39,7 @@ load = ["git", "prompts", "keybindings"]
 
 [plugins.git]
 enabled = true
-permissions = ["cwd:read", "process:run:git"]
+permissions = ["shell:source", "cwd:read", "process:run:git"]
 ```
 
 User shell code belongs in `~/.winshrc`:
@@ -55,9 +57,13 @@ oh-my-winuxsh/
   index.toml
   packs/
     git/plugin.toml
+    git/init.winux
     docker/plugin.toml
+    docker/init.winux
     kubectl/plugin.toml
+    kubectl/init.winux
     npm/plugin.toml
+    npm/init.winux
     zoxide/plugin.toml
     direnv/plugin.toml
     dotenv/plugin.toml
@@ -106,6 +112,8 @@ oh-my-winuxsh/
     roadmap.md
   templates/
     builtin/plugin.toml
+    source/plugin.toml
+    source/init.winux
     process/plugin.toml
     wasm/plugin.toml
 ```
@@ -114,10 +122,10 @@ oh-my-winuxsh/
 
 | Pack | Purpose | Default |
 | --- | --- | --- |
-| `git` | Git aliases, completions, prompt segment | On |
-| `docker` | Docker aliases and completion metadata | Off |
-| `kubectl` | Kubernetes aliases and completion metadata | Off |
-| `npm` | npm aliases and runtime completion shape | Off |
+| `git` | Git `.winux` helpers, aliases, completions, prompt segment | On |
+| `docker` | Docker `.winux` helpers, aliases, completion metadata | Off |
+| `kubectl` | Kubernetes `.winux` helpers, aliases, completion metadata | Off |
+| `npm` | npm `.winux` helpers, aliases, runtime completion shape | Off |
 | `zoxide` | Native `z` command shim and directory tracking | Off |
 | `direnv` | Explicit lifecycle hook adapter for `direnv export bash` | Off |
 | `dotenv` | Safe `.env` parser for current project directory | Off |
@@ -135,8 +143,8 @@ oh-my-winuxsh/
 ## Authoring
 
 Public pack authoring starts in [docs/authoring.md](docs/authoring.md). Use the
-copyable templates under `templates/` for builtin, process, and WASM manifests,
-then run:
+copyable templates under `templates/` for source, builtin, process, and WASM
+manifests, then run:
 
 ```sh
 python tools/validate_bundle.py
@@ -150,6 +158,7 @@ winuxsh plugin doctor
 
 The authoring contract is manifest-first: TOML declares runtime kind,
 permissions, exports, and required binaries before Winuxsh runs plugin code.
+Source plugins put shell code in bundle-local `.winux` files.
 
 ## Legacy
 
@@ -181,8 +190,9 @@ bundle inventory drift, manifest required fields, allowed runtime
 kinds/categories, exported asset directory presence, parseable alias packs,
 parseable completion definitions, prompt preset segment references, and
 declarative keybinding metadata and theme TOML assets for exported packs, plus the Phase 9 authoring
-guide and templates. Process manifests must be explicit opt-in and declare
-protocol, command, timeout, permissions, and required binaries. The package
+guide and templates. Source manifests must declare `shell:source` and a
+bundle-local `.winux` entry. Process manifests must be explicit opt-in and
+declare protocol, command, timeout, permissions, and required binaries. The package
 script builds `dist/oh-my-winuxsh-{version}.zip` plus a `.sha256` checksum when
 run without `--check`.
 WASM manifests must also declare a bundle-local `.wasm` module path and SHA-256;

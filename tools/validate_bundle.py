@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-KNOWN_KINDS = {"builtin", "wasm", "process"}
+KNOWN_KINDS = {"builtin", "source", "wasm", "process"}
 KNOWN_CATEGORIES = {"devtools", "environment", "workflow", "hints", "ux"}
 BUNDLE_API_VERSION = "winuxsh:plugin-bundle@0.1.0"
 INDEX_SCHEMA = "winuxsh:plugin-index@0.1.0"
@@ -33,6 +33,7 @@ WASM_PLUGIN_MAX_TIMEOUT_MILLIS = 30_000
 WASM_PLUGIN_MAX_MEMORY_PAGES = 4096
 AUTHORING_TEMPLATE_KINDS = {
     "builtin": "builtin",
+    "source": "source",
     "process": "process",
     "wasm": "wasm",
 }
@@ -382,6 +383,28 @@ def validate_process_manifest(pack_name: str, manifest: dict, exports: dict, err
         expect(command in required_binaries, f"{pack_name}: required_binaries must include {command!r}", errors)
 
 
+def validate_source_manifest(pack_name: str, manifest: dict, errors: list[str]) -> None:
+    kind = manifest.get("kind")
+    source = manifest.get("source")
+    if kind != "source":
+        expect(source is None, f"{pack_name}: [source] is only valid for kind = \"source\"", errors)
+        return
+
+    expect(isinstance(source, dict), f"{pack_name}: source pack must include [source]", errors)
+    if not isinstance(source, dict):
+        return
+    entry = source.get("entry")
+    expect(valid_manifest_token(entry), f"{pack_name}: source.entry must be a non-empty single-line string", errors)
+    if valid_manifest_token(entry):
+        entry_path = Path(str(entry))
+        expect(str(entry).endswith(".winux"), f"{pack_name}: source.entry must point to a .winux script", errors)
+        expect(not entry_path.is_absolute() and ".." not in entry_path.parts, f"{pack_name}: source.entry must be relative inside the bundle", errors)
+        expect((ROOT / entry_path).is_file(), f"{pack_name}: missing source entry {ROOT / entry_path}", errors)
+    permissions = manifest.get("permissions")
+    if isinstance(permissions, list):
+        expect("shell:source" in permissions, f"{pack_name}: source packs must declare shell:source", errors)
+
+
 def validate_wasm_manifest(pack_name: str, manifest: dict, exports: dict, errors: list[str]) -> None:
     kind = manifest.get("kind")
     wasm = manifest.get("wasm")
@@ -472,6 +495,8 @@ def validate_authoring_surface(errors: list[str]) -> None:
         expect(isinstance(manifest.get("exports"), dict), f"template {template_name}: missing [exports]", errors)
         if expected_kind == "process":
             expect(isinstance(manifest.get("process"), dict), "template process: missing [process]", errors)
+        if expected_kind == "source":
+            expect(isinstance(manifest.get("source"), dict), "template source: missing [source]", errors)
         if expected_kind == "wasm":
             expect(isinstance(manifest.get("wasm"), dict), "template wasm: missing [wasm]", errors)
 
@@ -634,6 +659,7 @@ def validate() -> list[str]:
         if pack_name == "keybindings":
             expect(bool(exports.get("keybindings")), "keybindings: exports.keybindings must not be empty", errors)
         validate_provider_exports(pack_name, manifest, exports, errors)
+        validate_source_manifest(pack_name, manifest, errors)
         validate_process_manifest(pack_name, manifest, exports, errors)
         validate_wasm_manifest(pack_name, manifest, exports, errors)
 

@@ -1,11 +1,14 @@
 # Externalization Readiness
-This document classifies the official bundle packs before moving any `builtin`
-pack into a code-bearing runtime. It is not a schema change and does not decide
-whether the future manifest should use a new runtime kind, `execution = "none"`,
-`asset_only = true`, or another marker.
+This document classifies official bundle packs before moving host-owned
+behavior out of `builtin`. It records when a pack belongs in `source`,
+`process`, `wasm`, or a future asset-only marker.
 ## Current Bundle Facts
 - Static bundle assets already cover aliases, completion tables, prompt presets,
   keybinding metadata, and themes.
+- Source packs are reviewed bundle-local `.winux` startup scripts. They are the
+  Oh My-style path for first-party shell helpers that intentionally define
+  aliases, functions, exports, or startup glue in the current interactive
+  shell.
 - WASM packs are command-only today. They can read args, cwd, and explicitly
   allowed env values, but they cannot act as completion, prompt, hook, or
   command-not-found or other providers yet.
@@ -22,10 +25,10 @@ whether the future manifest should use a new runtime kind, `execution = "none"`,
 ## Pack Matrix
 | Pack | Current runtime | Classification | Target runtime / execution model | Missing host API or decision | Shell-mutating | Fallback needed |
 | --- | --- | --- | --- | --- | --- | --- |
-| `git` | `builtin` | Mixed declarative/native | Declarative alias/completion assets plus native prompt segment until prompt provider ABI | Prompt segment provider ABI | No | Yes |
-| `docker` | `builtin` | Declarative asset | Asset-only/declarative; schema marker TBD | Asset-only schema decision | No | Minimal |
-| `kubectl` | `builtin` | Declarative asset | Asset-only/declarative; schema marker TBD | Asset-only schema decision | No | Minimal |
-| `npm` | `builtin` | Mixed declarative/native | Declarative assets plus native/dynamic completion until completion provider ABI | Completion/provider ABI | No | Yes |
+| `git` | `source` | Source helper plus mixed declarative/native | `.winux` helpers plus alias/completion assets; native prompt segment until prompt provider ABI | Prompt segment provider ABI | Yes, by trusted startup source | Yes |
+| `docker` | `source` | Source helper plus declarative asset | `.winux` helpers plus alias/completion assets | None for current first-party helper scope | Yes, by trusted startup source | Minimal |
+| `kubectl` | `source` | Source helper plus declarative asset | `.winux` helpers plus alias/completion assets | None for current first-party helper scope | Yes, by trusted startup source | Minimal |
+| `npm` | `source` | Source helper plus mixed declarative/native | `.winux` helpers plus assets; native/dynamic completion until completion provider ABI | Completion/provider ABI | Yes, by trusted startup source | Yes |
 | `zoxide` | `builtin` | Shell-effect candidate | Native builtin now; future effect runtime only after cwd effects are explicit | `shell:cwd:write`, lifecycle context, rollback behavior | Yes | Yes |
 | `direnv` | `builtin` | Shell-effect candidate | Native builtin now; future effect runtime only after env writes are structured | `env:write`, lifecycle context, rollback behavior | Yes | Yes |
 | `dotenv` | `builtin` | Shell-effect candidate | Native builtin now; future effect runtime only after fs/env effects are structured | Scoped file read, `env:write`, lifecycle context | Yes | Yes |
@@ -40,12 +43,15 @@ whether the future manifest should use a new runtime kind, `execution = "none"`,
 | `process-hook` | `process` | Fixture | Process hook fixture; not a generic effect runtime | Structured hook effects before normal use | No in fixture | No |
 | `wasm-hello` | `wasm` | Fixture | WASM command fixture; provider/effect ABI is separate | Provider/effect ABI is separate future work | No | No |
 ## Next Bundle Work
-1. Preserve existing `kind` values until Winuxsh chooses an asset-only schema.
-2. Treat `themes`, `keybindings`, static aliases, static completions, and prompt
+1. Use `kind = "source"` for reviewed first-party shell helpers whose value is
+   current-session shell code.
+2. Preserve `builtin` for host-owned native behavior and fallback paths until
+   Winuxsh exposes a better runtime/API.
+3. Treat `themes`, `keybindings`, static aliases, static completions, and prompt
    presets as declarative assets in docs and reviews even while manifests still
    say `kind = "builtin"`.
-3. Use [command-not-found](command-not-found-provider-abi.md) to design the
+4. Use [command-not-found](command-not-found-provider-abi.md) to design the
    first provider migration only after Winuxsh process binding proves deterministic input/output,
    permission review, timeout behavior, and compiled fallback rules.
-4. Do not migrate `zoxide`, `direnv`, `dotenv`, `fzf`, `thefuck`, or
+5. Do not migrate `zoxide`, `direnv`, `dotenv`, `fzf`, `thefuck`, or
    `last-working-dir` until shell effects are part of the host contract.

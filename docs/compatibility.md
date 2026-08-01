@@ -11,6 +11,7 @@ oh-my-winuxsh bundle.
 - Minimum host: `min_winuxsh = "0.8.3"`
 - Bundle API: `winuxsh:plugin-bundle@0.1.0`
 - Pack manifest API: `winuxsh:plugin@0.1.0`
+- Source plugin script suffix: `.winux`
 - Process plugin protocol: `winuxsh:process-plugin@0.1.0`
 - WASM plugin protocol: `winuxsh:wasm-plugin@0.1.0`
 
@@ -20,8 +21,11 @@ bundle safely.
 
 ## Runtime Surface
 
+- `source` packs load bundle-local `.winux` scripts into the current
+  interactive Winuxsh session. They are active for the interactive REPL and
+  `-C`; ordinary `-c`, script-file, and stdin execution stay clean by default.
 - `builtin` packs load first-party aliases, completions, prompts, keybindings,
-  themes, and built-in Winuxsh behavior.
+  themes, and built-in Winuxsh fallback/native behavior.
 - `process` packs are explicit opt-in adapters for native commands. They must
   declare `required_binaries`, `process:run:<command>` permission, protocol,
   command, arguments, and timeout.
@@ -35,9 +39,9 @@ bundle safely.
   candidate, and process packs may use the implemented command-not-found
   provider binding when `command:diagnose` is declared. WASM packs cannot
   export providers until Winuxsh defines a separate WASM provider contract.
-- Shell-mutating WASM host APIs, arbitrary sourced shell scripts, WASI, files,
-  processes, env mutation, ZLE widgets, DLL plugins, and unbounded native
-  process bridges are outside the current compatibility contract.
+- Shell-mutating WASM host APIs, arbitrary zsh source, WASI, files, processes,
+  env mutation, ZLE widgets, DLL plugins, and unbounded native process bridges
+  are outside the current compatibility contract.
 
 ## Semver Policy
 

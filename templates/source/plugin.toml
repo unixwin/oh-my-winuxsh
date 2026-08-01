@@ -1,0 +1,23 @@
+name = "example-source"
+bundle = "oh-my-winuxsh"
+version = "1.0.0"
+kind = "source"
+api = "winuxsh:plugin@0.1.0"
+category = "workflow"
+summary = "Source plugin pack template."
+default = false
+permissions = ["shell:source"]
+required_binaries = []
+
+[exports]
+aliases = false
+completions = []
+prompt_segments = []
+hooks = ["startup"]
+commands = []
+keybindings = []
+themes = []
+providers = []
+
+[source]
+entry = "packs/example-source/init.winux"

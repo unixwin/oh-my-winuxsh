@@ -15,44 +15,44 @@ signature = "unsupported"
 name = "git"
 version = "1.0.0"
 api = "winuxsh:plugin@0.1.0"
-kind = "builtin"
+kind = "source"
 category = "devtools"
 summary = "Git aliases, completions, and prompt segments."
 default = true
-permissions = ["cwd:read", "process:run:git"]
+permissions = ["shell:source", "cwd:read", "process:run:git"]
 required_binaries = ["git"]
 
 [[packs]]
 name = "docker"
 version = "1.0.0"
 api = "winuxsh:plugin@0.1.0"
-kind = "builtin"
+kind = "source"
 category = "devtools"
 summary = "Docker aliases and completion hints."
 default = false
-permissions = ["cwd:read", "process:run:docker"]
+permissions = ["shell:source", "cwd:read", "process:run:docker"]
 required_binaries = ["docker"]
 
 [[packs]]
 name = "kubectl"
 version = "1.0.0"
 api = "winuxsh:plugin@0.1.0"
-kind = "builtin"
+kind = "source"
 category = "devtools"
 summary = "Kubectl aliases and completion hints."
 default = false
-permissions = ["cwd:read", "process:run:kubectl"]
+permissions = ["shell:source", "cwd:read", "process:run:kubectl"]
 required_binaries = ["kubectl"]
 
 [[packs]]
 name = "npm"
 version = "1.0.0"
 api = "winuxsh:plugin@0.1.0"
-kind = "builtin"
+kind = "source"
 category = "devtools"
 summary = "npm aliases and runtime completion shape detection."
 default = false
-permissions = ["cwd:read", "process:run:npm"]
+permissions = ["shell:source", "cwd:read", "process:run:npm"]
 required_binaries = ["npm"]
 
 [[packs]]
