@@ -15,4 +15,32 @@ prompt_segments = []
 hooks = []
 commands = []
 keybindings = []
-themes = ["cyberpunk", "forest", "minimal", "ocean"]
+themes = [
+  "agnoster",
+  "avit",
+  "bira",
+  "catppuccin-mocha",
+  "classic",
+  "clean",
+  "colorful",
+  "compact",
+  "cyberpunk",
+  "dark",
+  "default",
+  "dracula",
+  "fishy",
+  "forest",
+  "gruvbox",
+  "lambda",
+  "light",
+  "minimal",
+  "ocean",
+  "p10-classic",
+  "p10-lean",
+  "p10-pure",
+  "p10-rainbow",
+  "pure",
+  "robbyrussell",
+  "spaceship",
+  "tokyonight",
+]

@@ -27,8 +27,10 @@ New model:
 
 - ship the bundle with Winuxsh releases;
 - describe packs with `bundle.toml` and `packs/*/plugin.toml`;
-- enable packs through `~/.winshrc.toml`;
-- keep `~/.winshrc` for user shell code only;
+- let users enable packs and themes from `~/.winuxshrc`;
+- keep `~/.winshrc.toml` for legacy/managed plugin CLI state, permissions,
+  bundle versions, migration blocks, and tests;
+- keep `~/.winshrc` only as a compatibility fallback;
 - support bundle update and rollback through Winuxsh plugin commands.
 
 ## Zsh and Oh My Zsh

@@ -1,0 +1,17 @@
+# Oh My Winuxsh npm plugin.
+
+[ -f "$WINUXSH/lib/aliases.winux" ] && . "$WINUXSH/lib/aliases.winux"
+
+winuxsh_load_alias_asset npm
+
+nr() {
+  npm run "$@"
+}
+
+nrd() {
+  npm run dev "$@"
+}
+
+nrb() {
+  npm run build "$@"
+}

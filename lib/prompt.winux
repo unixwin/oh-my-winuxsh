@@ -1,0 +1,30 @@
+# Prompt helpers used by theme plugins.
+
+winuxsh_prompt_use_template() {
+  WINUXSH_PROMPT_LEFT="$1"
+  WINUXSH_PROMPT_RIGHT="${2:-}"
+  export WINUXSH_PROMPT_LEFT WINUXSH_PROMPT_RIGHT
+}
+
+winuxsh_use_theme() {
+  __omw_theme_name="$1"
+
+  if [ -f "$WINUXSH_CUSTOM/themes/$__omw_theme_name/$__omw_theme_name.theme.winux" ]; then
+    . "$WINUXSH_CUSTOM/themes/$__omw_theme_name/$__omw_theme_name.theme.winux"
+    return $?
+  fi
+
+  if [ -f "$WINUXSH/themes/$__omw_theme_name/$__omw_theme_name.theme.winux" ]; then
+    . "$WINUXSH/themes/$__omw_theme_name/$__omw_theme_name.theme.winux"
+    return $?
+  fi
+
+  if [ -f "$WINUXSH/themes/$__omw_theme_name.toml" ]; then
+    WINUXSH_ACTIVE_THEME="$__omw_theme_name"
+    WINUXSH_THEME_FILE="$WINUXSH/themes/$__omw_theme_name.toml"
+    export WINUXSH_ACTIVE_THEME WINUXSH_THEME_FILE
+    return 0
+  fi
+
+  return 1
+}

@@ -8,7 +8,7 @@ oh-my-winuxsh bundle.
 - Bundle name: `oh-my-winuxsh`
 - Bundle version: `1.0.1`
 - Release channel: `stable`
-- Minimum host: `min_winuxsh = "0.9.4"`
+- Minimum host: `min_winuxsh = "0.10.0"`
 - Bundle API: `winuxsh:plugin-bundle@0.1.0`
 - Pack manifest API: `winuxsh:plugin@0.1.0`
 - Source plugin script suffix: `.winux`
@@ -25,8 +25,8 @@ bundle safely.
   interactive Winuxsh session during `startup`, `precmd`, `preexec`, and
   `chpwd` lifecycle hooks. They are active for the interactive REPL and `-C`;
   ordinary `-c`, script-file, and stdin execution stay clean by default.
-- `builtin` packs load first-party aliases, completions, prompts, keybindings,
-  themes, and built-in Winuxsh fallback/native behavior.
+- `builtin` packs load first-party native behavior that still lives in Winuxsh
+  core. Official prompt and theme behavior belongs to source plugins.
 - `process` packs are explicit opt-in adapters for native commands. They must
   declare `required_binaries`, `process:run:<command>` permission, protocol,
   command, arguments, and timeout.

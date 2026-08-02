@@ -1,0 +1,22 @@
+# Oh My Winuxsh kubectl plugin.
+
+[ -f "$WINUXSH/lib/aliases.winux" ] && . "$WINUXSH/lib/aliases.winux"
+
+winuxsh_load_alias_asset kubectl
+
+kns() {
+  if [ -z "$1" ]; then
+    kubectl config view --minify --output 'jsonpath={..namespace}'
+    echo
+    return
+  fi
+  kubectl config set-context --current --namespace "$1"
+}
+
+kctx() {
+  if [ -z "$1" ]; then
+    kubectl config current-context
+    return
+  fi
+  kubectl config use-context "$1"
+}

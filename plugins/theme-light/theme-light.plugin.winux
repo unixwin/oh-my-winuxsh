@@ -1,0 +1,10 @@
+# Light official theme plugin.
+
+[ -f "$WINUXSH/lib/prompt.winux" ] && . "$WINUXSH/lib/prompt.winux"
+
+WINUXSH_ACTIVE_THEME=light
+WINUXSH_THEME_FILE="$WINUXSH/themes/light.toml"
+WINUXSH_PROMPT_SYMBOL="${WINUXSH_PROMPT_SYMBOL:-%}"
+export WINUXSH_ACTIVE_THEME WINUXSH_THEME_FILE WINUXSH_PROMPT_SYMBOL
+
+winuxsh_prompt_use_template "{user_host} {cwd} {git}{prompt_char} " ""

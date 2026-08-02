@@ -1,0 +1,11 @@
+# Oh My Winuxsh thefuck plugin.
+
+fuck() {
+  command -v thefuck >/dev/null 2>&1 || {
+    echo "thefuck is not installed or not on PATH" >&2
+    return 127
+  }
+
+  __winuxsh_thefuck_command=$(thefuck "$@") || return
+  [ -n "$__winuxsh_thefuck_command" ] && eval "$__winuxsh_thefuck_command"
+}

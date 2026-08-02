@@ -11,16 +11,24 @@ changes, and user-visible asset changes.
 - Released first-party `.winux` source packs for Git, Docker, kubectl, npm,
   zoxide, direnv, dotenv, fzf, last-working-dir, and thefuck against the
   Winuxsh source lifecycle host.
-- Kept prompts, keybindings, themes, and command-not-found as host-consumed
-  builtin/declarative packs rather than pretending they are source scripts.
+- Added the framework entry point, directory-first official plugins,
+  `prompt-core`, and theme plugins for minimal, classic, pure, compact,
+  cyberpunk, forest, and ocean.
+- Kept keybindings and command-not-found as bridge plugins while their low-level
+  Reedline/provider call sites remain host-owned.
+- Kept old `packs/` manifests as compatibility and package-review metadata over
+  the directory plugin surface.
+- Added `tools/smoke_framework.winux` for runtime verification with an
+  installed Winuxsh binary.
 - Updated bundle metadata with `api = "winuxsh:plugin-bundle@0.1.0"` and
-  `min_winuxsh = "0.9.4"` so older Winuxsh hosts refuse this source-pack bundle.
+  `min_winuxsh = "0.10.0"` so older Winuxsh hosts refuse this RC-first
+  source-pack bundle.
 - Added deterministic release packaging for `oh-my-winuxsh-1.0.1.zip` and the
   matching `.sha256` checksum file.
 
 ### Compatibility
 
-- Requires Winuxsh 0.9.4 or newer for source plugin startup and lifecycle hook
+- Requires Winuxsh 0.10.0 or newer for source plugin startup and lifecycle hook
   loading through `.winux` files.
 - Keeps process and WASM plugin protocols unchanged; WASM provider/effect APIs
   remain future host work.
@@ -32,6 +40,8 @@ changes, and user-visible asset changes.
 - Include this changelog entry and `docs/compatibility.md` in the release notes.
 - Run `python tools/validate_bundle.py` and
   `python tools/package_bundle.py --check` before publishing.
+- Run `winuxsh tools/smoke_framework.winux .` before publishing framework
+  changes.
 
 ## 1.0.0 - 2026-07-31
 

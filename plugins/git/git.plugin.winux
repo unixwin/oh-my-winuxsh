@@ -1,0 +1,23 @@
+# Oh My Winuxsh git plugin.
+
+[ -f "$WINUXSH/lib/git.winux" ] && . "$WINUXSH/lib/git.winux"
+[ -f "$WINUXSH/lib/aliases.winux" ] && . "$WINUXSH/lib/aliases.winux"
+
+winuxsh_load_alias_asset git
+
+groot() {
+  __omw_git_root="$(git rev-parse --show-toplevel 2>/dev/null)" || return
+  cd "$__omw_git_root"
+}
+
+gbranch() {
+  git branch --show-current "$@"
+}
+
+gmain() {
+  if git rev-parse --verify main >/dev/null 2>&1; then
+    git switch main "$@"
+  else
+    git switch master "$@"
+  fi
+}

@@ -2,7 +2,7 @@ schema = "winuxsh:plugin-index@0.1.0"
 bundle = "oh-my-winuxsh"
 version = "1.0.1"
 bundle_api = "winuxsh:plugin-bundle@0.1.0"
-min_winuxsh = "0.9.4"
+min_winuxsh = "0.10.0"
 
 [release]
 artifact = "oh-my-winuxsh-1.0.1.zip"

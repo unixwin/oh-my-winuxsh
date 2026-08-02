@@ -137,10 +137,11 @@ Rules:
 - `source.entry` must be a bundle-local relative path ending in `.winux`.
 - `exports.hooks` may contain `startup`, `precmd`, `preexec`, and `chpwd`.
 - Source plugins may define aliases, functions, exports, cwd-changing helpers,
-  and shell lifecycle glue, but plugin enablement and permissions remain in
-  `~/.winshrc.toml`.
-- User `~/.winshrc` runs after official source plugins, so user shell code can
-  override plugin defaults.
+  and shell lifecycle glue. Normal user-authored plugin lists and shell code
+  belong in `~/.winuxshrc`; plugin CLI state and permissions remain in
+  legacy/managed `~/.winshrc.toml`.
+- User `~/.winuxshrc` is the primary framework entry point. `~/.winshrc`
+  remains a fallback for older setups.
 
 ### Builtin
 

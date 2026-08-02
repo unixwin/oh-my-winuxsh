@@ -1,0 +1,114 @@
+# Smoke test the directory-first Oh My Winuxsh framework with Winuxsh.
+#
+# Usage:
+#   winuxsh tools/smoke_framework.winux C:/path/to/oh-my-winuxsh
+
+ROOT="${1:-$PWD}"
+failures=0
+
+fail() {
+  echo "error: $*" >&2
+  failures=$((failures + 1))
+}
+
+expect_eq() {
+  label="$1"
+  actual="$2"
+  expected="$3"
+  if [ "$actual" != "$expected" ]; then
+    fail "$label: expected '$expected', got '$actual'"
+  fi
+}
+
+expect_nonempty() {
+  label="$1"
+  value="$2"
+  if [ -z "$value" ]; then
+    fail "$label: expected non-empty value"
+  fi
+}
+
+expect_type() {
+  name="$1"
+  type "$name" >/dev/null 2>&1 || fail "missing command/function: $name"
+}
+
+expect_alias() {
+  name="$1"
+  alias "$name" >/dev/null 2>&1 || fail "missing alias: $name"
+}
+
+source_framework() {
+  WINUXSH="$ROOT"
+  WINUXSH_CUSTOM="$ROOT/.smoke-custom"
+  export WINUXSH WINUXSH_CUSTOM
+  . "$WINUXSH/oh-my-winuxsh.winux"
+}
+
+cd $ROOT || {
+  echo "error: cannot cd to $ROOT" >&2
+  exit 2
+}
+
+WINUXSH_THEME=minimal
+WINUXSH_THEME_PLUGIN=theme-minimal
+WINUXSH_PLUGINS=(prompt-core git)
+source_framework
+expect_eq "default plugins" "${WINUXSH_PLUGINS[*]}" "prompt-core git"
+expect_eq "default theme" "$WINUXSH_ACTIVE_THEME" "minimal"
+expect_type winuxsh_prompt_render_left
+expect_type winuxsh_prompt_git_info
+expect_nonempty "minimal prompt" "$(winuxsh_prompt_render_left)"
+WINUXSH_PROMPT_GIT="git:(framework-smoke)"
+export WINUXSH_PROMPT_GIT
+expect_eq "git prompt reads host snapshot" "$(winuxsh_prompt_git_info)" "$WINUXSH_PROMPT_GIT"
+
+for theme in default dark light colorful minimal classic pure compact cyberpunk forest ocean agnoster avit bira clean fishy lambda p10-lean p10-classic p10-rainbow p10-pure robbyrussell dracula catppuccin-mocha gruvbox spaceship tokyonight; do
+  WINUXSH_THEME="$theme"
+  WINUXSH_THEME_PLUGIN="theme-$theme"
+  WINUXSH_PLUGINS=(prompt-core git)
+  source_framework
+  expect_eq "theme $theme active" "$WINUXSH_ACTIVE_THEME" "$theme"
+  expect_nonempty "theme $theme prompt" "$(winuxsh_prompt_render_left)"
+done
+
+WINUXSH_THEME=minimal
+WINUXSH_THEME_PLUGIN=theme-minimal
+WINUXSH_PLUGINS=(prompt-core git common-aliases docker kubectl npm path-tools extract)
+source_framework
+expect_alias ll
+expect_alias gst
+expect_alias dps
+expect_alias k
+expect_alias npmR
+expect_type groot
+expect_type dsh
+expect_type kns
+expect_type nr
+expect_type path_list
+expect_type path_prepend
+expect_type path_append
+expect_type path_remove
+expect_type path_dedupe
+expect_type extract
+
+smoke_dir="C:/tmp/omw-framework-smoke-$$"
+mkdir -p "$smoke_dir" || exit 2
+printf "OMW_FRAMEWORK_SMOKE=ok\n" > "$smoke_dir/.env"
+cd $smoke_dir || exit 2
+
+WINUXSH_THEME=minimal
+WINUXSH_THEME_PLUGIN=theme-minimal
+WINUXSH_PLUGINS=(prompt-core dotenv)
+source_framework
+expect_eq "dotenv hook" "$OMW_FRAMEWORK_SMOKE" "ok"
+
+cd $ROOT || exit 2
+rm -rf "$smoke_dir"
+
+if [ "$failures" -ne 0 ]; then
+  echo "framework smoke failed: $failures failure(s)" >&2
+  exit 1
+fi
+
+echo "framework smoke ok"

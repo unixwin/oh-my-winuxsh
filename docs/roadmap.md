@@ -1,4 +1,13 @@
-# Oh My Winuxsh Roadmap
+# Historical Oh My Winuxsh Roadmap
+
+Status: historical. This roadmap describes the manifest-first bundle phases that
+were implemented before the framework-first direction reset. Keep it for
+release archaeology and compatibility context, but do not use it as the active
+design source for new plugin-system work.
+
+The active direction is [design.md](design.md): plugin directories first,
+themes as plugins, bundled distribution without core-owned builtin plugin
+behavior, and manifests as packaging/review metadata over the plugin system.
 
 This roadmap is synchronized with Winuxsh's plugin-system roadmap. Phase numbers
 must stay aligned with `DOCS/plugin-system-roadmap.md` in the Winuxsh repo.
@@ -183,7 +192,7 @@ Current branch progress:
   validate bundle API, `min_winuxsh`, manifests/API, and roll back by
   switching the lock file.
 - `bundle.toml` now declares `api = "winuxsh:plugin-bundle@0.1.0"`
-  and `min_winuxsh = "0.9.4"`; the validator treats both as release
+  and `min_winuxsh = "0.10.0"`; the validator treats both as release
   metadata.
 - The paired Winuxsh branch validates bundle-level API and refuses updates
   whose `min_winuxsh` is newer than the running host.
@@ -397,8 +406,10 @@ theme marketplace/distribution remains future work.
 oh-my-winuxsh work:
 
 - Add a `themes` builtin UX pack with static theme assets.
-- Ship `themes/cyberpunk.toml`, `themes/forest.toml`, `themes/minimal.toml`,
-  and `themes/ocean.toml` using the same style schema as user themes.
+- Ship official theme style assets such as `themes/minimal.toml`,
+  `themes/classic.toml`, `themes/pure.toml`, `themes/compact.toml`,
+  `themes/cyberpunk.toml`, `themes/forest.toml`, and `themes/ocean.toml`
+  using the same style schema as user themes.
 - Validate exported theme files in `tools/validate_bundle.py`.
 - Include `themes/` in deterministic release artifacts.
 

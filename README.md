@@ -1,48 +1,64 @@
 # Oh My Winuxsh
 
-Official bundled plugin distribution for Winuxsh.
+Official Oh My-style plugin framework and bundled plugin distribution for
+Winuxsh.
 
-This repository is not an Oh My Zsh fork and does not provide zsh plugin
-compatibility. It contains first-party Winuxsh plugin bundle metadata that the
-Winuxsh plugin system can ship, inspect, update, and roll back.
+This repository is not a zsh runtime and does not provide zsh plugin
+compatibility. It should, however, follow the useful shape of Oh My Zsh, fish
+plugin managers, and PowerShell prompt frameworks: plugins are directories,
+themes are plugins, and the shell core provides loader primitives instead of
+owning high-level plugin behavior.
 
 ## Status
 
-This branch rebuilds the repository for the current Winuxsh architecture:
+The active direction is framework-first. See [docs/design.md](docs/design.md).
+The earlier manifest-first bundle design is retired in
+[docs/design-manifest-first-retired.md](docs/design-manifest-first-retired.md).
 
-- Winuxsh owns the shell frontend, config, plugin registry, and permission model.
-- `oh-my-winuxsh` provides official plugin manifests and bundled assets.
-- First-party shell plugins can ship `.winux` startup and lifecycle hook code through
-  `kind = "source"`, close to the Oh My Zsh model but gated by manifests and
-  permission review.
-- Future sandboxed third-party providers can use the same manifest model, with
-  WASM/WASI as the preferred runtime once the host API is stable.
+- Winuxsh owns shell primitives, plugin loading, lifecycle dispatch, permission
+  review, update/rollback, and fast native helpers.
+- `oh-my-winuxsh` owns framework libraries, plugin directories, themes, default
+  composition, and the official bundled distribution.
+- Bundled plugins may ship with Winuxsh, but bundled does not mean built in.
+- `plugin.toml` is metadata for packaging, review, and updates. It should not be
+  the only way to express local trusted shell behavior.
 
-## Bundle Model
+## Framework Model
 
-The bundle is expected to ship with Winuxsh releases, similar to how winuxcmd is
-bundled as the default coreutils layer. Users should have a local baseline even
-without network access, then update the bundle independently:
+The target interactive setup is directory-first and familiar:
 
 ```sh
-winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.1.zip --checksum-file dist\oh-my-winuxsh-1.0.1.zip.sha256
-winuxsh plugin rollback oh-my-winuxsh
+WINUXSH_PLUGINS=(prompt-core git docker zoxide)
+WINUXSH_THEME=minimal
+source "$WINUXSH/oh-my-winuxsh.winux"
 ```
 
-Plugin state belongs in `~/.winshrc.toml`:
+Managed TOML should map onto the same plugin system:
 
 ```toml
 [plugins]
 enabled = true
 bundles = ["oh-my-winuxsh"]
-load = ["git", "prompts", "keybindings"]
+load = ["prompt-core", "git", "docker", "zoxide"]
+
+[theme]
+current_theme = "minimal"
 
 [plugins.git]
 enabled = true
 permissions = ["shell:source", "cwd:read", "process:run:git"]
 ```
 
-User shell code belongs in `~/.winshrc`:
+The bundle is still expected to ship with Winuxsh releases so users have an
+offline baseline, then update independently:
+
+```sh
+winuxsh plugin update oh-my-winuxsh --from dist\oh-my-winuxsh-1.0.1.zip --checksum-file dist\oh-my-winuxsh-1.0.1.zip.sha256
+winuxsh plugin rollback oh-my-winuxsh
+```
+
+User shell code and normal plugin/theme selection belong in `~/.winuxshrc`.
+`~/.winshrc` is only a legacy fallback when `~/.winuxshrc` is absent:
 
 ```sh
 alias ll='ls -la'
@@ -53,33 +69,71 @@ export EDITOR=vim
 
 ```text
 oh-my-winuxsh/
+  oh-my-winuxsh.winux
   bundle.toml
   index.toml
+  lib/
+    aliases.winux
+    git.winux
+    prompt.winux
+    hooks.winux
+  plugins/
+    prompt-core/
+      prompt-core.plugin.winux
+      plugin.toml
+    git/
+      git.plugin.winux
+      plugin.toml
+      functions/
+      completions/
+    theme-minimal/
+      theme-minimal.plugin.winux
+      plugin.toml
+    theme-default/
+    theme-dark/
+    theme-light/
+    theme-colorful/
+    theme-classic/
+    theme-pure/
+    theme-compact/
+    theme-cyberpunk/
+    theme-forest/
+    theme-ocean/
+    theme-agnoster/
+    theme-avit/
+    theme-bira/
+    theme-clean/
+    theme-fishy/
+    theme-lambda/
+    theme-p10-lean/
+    theme-p10-classic/
+    theme-p10-rainbow/
+    theme-p10-pure/
+    theme-robbyrussell/
+    theme-dracula/
+    theme-catppuccin-mocha/
+    theme-gruvbox/
+    theme-spaceship/
+    theme-tokyonight/
+    common-aliases/
+    path-tools/
+    extract/
+    docker/
+    kubectl/
+    npm/
+    zoxide/
+    direnv/
+    dotenv/
+    fzf/
+    last-working-dir/
+    thefuck/
+    keybindings/
+    command-not-found/
   packs/
-    git/plugin.toml
-    git/init.winux
-    docker/plugin.toml
-    docker/init.winux
-    kubectl/plugin.toml
-    kubectl/init.winux
-    npm/plugin.toml
-    npm/init.winux
-    zoxide/plugin.toml
-    zoxide/init.winux
-    direnv/plugin.toml
-    direnv/init.winux
-    dotenv/plugin.toml
-    dotenv/init.winux
-    fzf/plugin.toml
-    fzf/init.winux
-    command-not-found/plugin.toml
-    last-working-dir/plugin.toml
-    last-working-dir/init.winux
-    thefuck/plugin.toml
-    thefuck/init.winux
-    keybindings/plugin.toml
-    prompts/plugin.toml
+    ...
+    # Transitional manifest-first compatibility surface.
   aliases/
+    common-aliases.toml
     git.toml
     docker.toml
     kubectl.toml
@@ -100,14 +154,28 @@ oh-my-winuxsh/
     vi.toml
     README.md
   themes/
+    default.toml
+    dark.toml
+    light.toml
+    colorful.toml
     cyberpunk.toml
+    classic.toml
+    compact.toml
     forest.toml
     minimal.toml
     ocean.toml
+    p10-lean.toml
+    p10-classic.toml
+    p10-rainbow.toml
+    p10-pure.toml
+    pure.toml
+    robbyrussell.toml
     README.md
   docs/
     authoring.md
     design.md
+    framework-smoke-notes.md
+    design-manifest-first-retired.md
     migration.md
     roadmap.md
   templates/
@@ -118,30 +186,75 @@ oh-my-winuxsh/
     wasm/plugin.toml
 ```
 
-## First-Party Packs
+## First-Party Plugins
 
-| Pack | Purpose | Default |
+These are the active Oh My-style plugin directories. Themes are regular
+plugins, and `prompt-core` owns the common prompt API.
+
+| Plugin | Purpose | Default |
 | --- | --- | --- |
-| `git` | Git `.winux` helpers, aliases, completions, prompt segment | On |
+| `prompt-core` | Prompt API, segment registry, and Git status prompt service | On |
+| `theme-default` | Official default theme plugin | Off |
+| `theme-dark` | Official dark theme plugin | Off |
+| `theme-light` | Official light theme plugin | Off |
+| `theme-colorful` | Official colorful theme plugin | Off |
+| `theme-minimal` | Minimal official prompt theme plugin | On |
+| `theme-classic` | Classic two-line official prompt theme plugin | Off |
+| `theme-pure` | Pure-inspired two-line official prompt theme plugin | Off |
+| `theme-compact` | Compact single-line official prompt theme plugin | Off |
+| `theme-cyberpunk` | Cyberpunk official prompt theme plugin | Off |
+| `theme-forest` | Forest official prompt theme plugin | Off |
+| `theme-ocean` | Ocean official prompt theme plugin | Off |
+| `theme-agnoster` | Agnoster-style Nerd Font prompt theme plugin | Off |
+| `theme-avit` | Avit-style Oh My Zsh prompt theme plugin | Off |
+| `theme-bira` | Bira-style two-line Oh My Zsh prompt theme plugin | Off |
+| `theme-clean` | Clean Oh My Zsh prompt theme plugin | Off |
+| `theme-fishy` | Fish-like prompt theme plugin inspired by Oh My Zsh and fish-shell | Off |
+| `theme-lambda` | Lambda-style minimal Oh My Zsh prompt theme plugin | Off |
+| `theme-p10-lean` | Powerlevel-style lean prompt theme plugin | Off |
+| `theme-p10-classic` | Powerlevel-style classic prompt theme plugin | Off |
+| `theme-p10-rainbow` | Powerlevel-style rainbow prompt theme plugin | Off |
+| `theme-p10-pure` | Powerlevel-style pure prompt theme plugin | Off |
+| `theme-robbyrussell` | Robby Russell-style prompt theme plugin | Off |
+| `theme-dracula` | Dracula Nerd Font prompt theme plugin inspired by Oh My Posh | Off |
+| `theme-catppuccin-mocha` | Catppuccin Mocha Nerd Font prompt theme plugin inspired by Oh My Posh | Off |
+| `theme-gruvbox` | Gruvbox Nerd Font prompt theme plugin inspired by Oh My Posh | Off |
+| `theme-spaceship` | Spaceship-style Nerd Font prompt theme plugin inspired by Oh My Posh | Off |
+| `theme-tokyonight` | Tokyo Night Nerd Font prompt theme plugin inspired by Oh My Posh | Off |
+| `git` | Git aliases, completions, and workflow helpers | On |
+| `common-aliases` | Small Oh My-style navigation/listing aliases | Off |
 | `docker` | Docker `.winux` helpers, aliases, completion metadata | Off |
 | `kubectl` | Kubernetes `.winux` helpers, aliases, completion metadata | Off |
 | `npm` | npm `.winux` helpers, aliases, runtime completion shape | Off |
+| `path-tools` | PATH inspection and edit helpers inspired by fish ergonomics | Off |
+| `extract` | Archive extraction helper for common compressed formats | Off |
 | `zoxide` | `.winux` `z`/`zi` helpers plus directory tracking hooks | Off |
 | `direnv` | `.winux` lifecycle adapter for `direnv export bash` | Off |
 | `dotenv` | `.winux` `.env` loader for current project directory | Off |
 | `fzf` | `.winux` directory selector command shims | Off |
-| `command-not-found` | Interactive missing-command hints | Off |
 | `last-working-dir` | `.winux` last-directory cache and restore hooks | Off |
 | `thefuck` | `.winux` correction shim for the previous command | Off |
-| `keybindings` | Winuxsh keybinding presets, not ZLE support | On |
-| `prompts` | Prompt presets and segment defaults | On |
-| `themes` | Official prompt and Git status color themes | On |
+| `keybindings` | Bridge plugin for official Reedline keybinding assets | On |
+| `command-not-found` | Bridge plugin for the missing-command provider identity | Off |
+
+## Transitional Packs
+
+`packs/`, `aliases/`, `completions/`, `prompts/`, `keybindings/`, and
+`themes/` remain in the repository because current Winuxsh releases and release
+tools still understand the manifest-first bundle layout. New behavior should
+land in `plugins/<name>/` first, then expose metadata through TOML for review,
+managed install, update, and rollback.
+
+The old `prompts` and `themes` packs are compatibility assets. They are no
+longer the product model for prompt and theme behavior; `prompt-core` and
+`theme-*` plugins are.
 
 ## Authoring
 
-Public pack authoring starts in [docs/authoring.md](docs/authoring.md). Use the
-copyable templates under `templates/` for source, builtin, process, and WASM
-manifests, then run:
+Public authoring is moving to plugin directories. During the transition,
+[docs/authoring.md](docs/authoring.md) still describes the manifest-backed
+bundle surface and templates, but new user-facing behavior should start as
+plugin-owned code/assets rather than Winuxsh `builtin` packs.
 
 ```sh
 python tools/validate_bundle.py
@@ -153,11 +266,9 @@ winuxsh plugin install git
 winuxsh plugin doctor
 ```
 
-The authoring contract is manifest-first: TOML declares runtime kind,
-permissions, exports, and required binaries before Winuxsh runs plugin code.
-Source plugins put shell code in bundle-local `.winux` files and may export
-`startup`, `precmd`, `preexec`, or `chpwd` hooks when the Winuxsh host supports
-source lifecycle hooks.
+`plugin.toml` remains useful for package metadata, permissions, exports, and
+required binaries before Winuxsh runs distributed plugin code. It should be a
+review/install surface over plugin directories, not the product identity.
 
 ## Legacy
 
@@ -169,8 +280,9 @@ See [docs/migration.md](docs/migration.md).
 
 ## Roadmap
 
-The synchronized implementation roadmap lives in [docs/roadmap.md](docs/roadmap.md).
-Its phase numbers are aligned with Winuxsh's `DOCS/plugin-system-roadmap.md`.
+The active product direction lives in [docs/design.md](docs/design.md). The old
+phase roadmap remains in [docs/roadmap.md](docs/roadmap.md) as manifest-first
+history until the framework-first migration plan replaces it.
 Release compatibility is tracked in [docs/compatibility.md](docs/compatibility.md),
 and bundle changes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
@@ -182,18 +294,21 @@ python tools/package_bundle.py --check
 # Windows launcher:
 py tools\validate_bundle.py
 py tools\package_bundle.py --check
+# Runtime smoke with the selected Winuxsh binary:
+winuxsh tools/smoke_framework.winux .
 ```
 
-The validator checks release documents, package index drift, release checksum policy, bundle API and minimum Winuxsh metadata,
-bundle inventory drift, manifest required fields, allowed runtime
-kinds/categories, exported asset directory presence, parseable alias packs,
-parseable completion definitions, prompt preset segment references, and
-declarative keybinding metadata and theme TOML assets for exported packs, plus the Phase 9 authoring
-guide and templates. Source manifests must declare `shell:source`, supported
-lifecycle hooks, and a bundle-local `.winux` entry. Process manifests must be explicit opt-in and
-declare protocol, command, timeout, permissions, and required binaries. The package
-script builds `dist/oh-my-winuxsh-{version}.zip` plus a `.sha256` checksum when
-run without `--check`.
+The validator checks release documents, package index drift, release checksum
+policy, bundle API and minimum Winuxsh metadata, old manifest inventory drift,
+directory plugin inventory drift, plugin entry scripts, plugin metadata,
+exported asset presence, parseable alias packs, parseable completion
+definitions, prompt preset segment references, declarative keybinding metadata,
+and theme TOML assets. Source manifests must declare `shell:source`, supported
+lifecycle hooks, and a bundle-local `.winux` entry. Process manifests must be
+explicit opt-in and declare protocol, command, timeout, permissions, and
+required binaries. The package script builds
+`dist/oh-my-winuxsh-{version}.zip` plus a `.sha256` checksum when run without
+`--check`.
 WASM manifests must also declare a bundle-local `.wasm` module path and SHA-256;
 the validator checks that the artifact exists, matches the digest, and has a
 valid WASM binary header. The current Winuxsh host can execute explicit command

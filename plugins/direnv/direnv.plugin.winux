@@ -1,0 +1,12 @@
+# Oh My Winuxsh direnv plugin.
+
+[ -f "$WINUXSH/lib/hooks.winux" ] && . "$WINUXSH/lib/hooks.winux"
+
+__winuxsh_direnv_apply() {
+  command -v direnv >/dev/null 2>&1 || return 0
+  eval "$(direnv export bash 2>/dev/null)" || true
+}
+
+winuxsh_add_startup_hook __winuxsh_direnv_apply
+winuxsh_add_precmd_hook __winuxsh_direnv_apply
+winuxsh_add_chpwd_hook __winuxsh_direnv_apply

@@ -15,6 +15,8 @@ import validate_bundle
 ROOT = Path(__file__).resolve().parents[1]
 FIXED_ZIP_DATE = (1980, 1, 1, 0, 0, 0)
 RELEASE_DIRS = [
+    "lib",
+    "plugins",
     "packs",
     "aliases",
     "completions",
@@ -24,8 +26,18 @@ RELEASE_DIRS = [
     "wasm",
     "docs",
     "templates",
+    "tools",
 ]
-RELEASE_FILES = ["bundle.toml", "index.toml", "README.md", "CHANGELOG.md"]
+RELEASE_FILES = ["oh-my-winuxsh.winux", "bundle.toml", "index.toml", "README.md", "CHANGELOG.md"]
+
+
+def include_release_path(path: Path) -> bool:
+    relative = path.relative_to(ROOT)
+    if "__pycache__" in relative.parts:
+        return False
+    if path.suffix in {".pyc", ".pyo"}:
+        return False
+    return True
 
 
 def load_version() -> str:
@@ -37,7 +49,7 @@ def release_paths() -> list[Path]:
     for name in RELEASE_FILES:
         paths.append(ROOT / name)
     for dirname in RELEASE_DIRS:
-        paths.extend(path for path in (ROOT / dirname).rglob("*") if path.is_file())
+        paths.extend(path for path in (ROOT / dirname).rglob("*") if path.is_file() and include_release_path(path))
     return sorted(paths, key=lambda path: path.relative_to(ROOT).as_posix())
 
 

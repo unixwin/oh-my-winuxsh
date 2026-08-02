@@ -2,4 +2,10 @@
 
 Official Winuxsh theme assets use the same TOML style schema as user themes under `~/.winuxsh/themes`.
 
-These files are static data only. They do not source shell scripts, execute prompt commands, or implement an Oh My Zsh theme runtime.
+These files are static style data. Runtime theme behavior belongs to
+`plugins/theme-*`, where each theme selects prompt-core templates and symbols.
+
+Themes inspired by Powerlevel10k, Agnoster, Dracula, Catppuccin, Gruvbox,
+Spaceship, and Tokyo Night may use Nerd Font glyphs in their plugin templates.
+The TOML files still use plain style data so users can override foreground and
+background colors with exact hex values.

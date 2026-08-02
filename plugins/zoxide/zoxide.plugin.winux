@@ -1,0 +1,41 @@
+# Oh My Winuxsh zoxide plugin.
+
+[ -f "$WINUXSH/lib/hooks.winux" ] && . "$WINUXSH/lib/hooks.winux"
+
+__winuxsh_zoxide_available() {
+  command -v zoxide >/dev/null 2>&1
+}
+
+__winuxsh_zoxide_track() {
+  __winuxsh_zoxide_available || return 0
+  zoxide add "$PWD" >/dev/null 2>&1 || true
+}
+
+z() {
+  __winuxsh_zoxide_available || {
+    echo "zoxide is not installed or not on PATH" >&2
+    return 127
+  }
+
+  if [ "$#" -eq 0 ]; then
+    cd "$HOME"
+    return
+  fi
+
+  __winuxsh_zoxide_target=$(zoxide query "$@") || return
+  [ -n "$__winuxsh_zoxide_target" ] && cd "$__winuxsh_zoxide_target"
+}
+
+zi() {
+  __winuxsh_zoxide_available || {
+    echo "zoxide is not installed or not on PATH" >&2
+    return 127
+  }
+
+  __winuxsh_zoxide_target=$(zoxide query -i "$@") || return
+  [ -n "$__winuxsh_zoxide_target" ] && cd "$__winuxsh_zoxide_target"
+}
+
+winuxsh_add_startup_hook __winuxsh_zoxide_track
+winuxsh_add_precmd_hook __winuxsh_zoxide_track
+winuxsh_add_chpwd_hook __winuxsh_zoxide_track

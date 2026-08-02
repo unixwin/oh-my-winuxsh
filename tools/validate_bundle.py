@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 KNOWN_KINDS = {"builtin", "source", "wasm", "process"}
+FRAMEWORK_PLUGIN_KINDS = {"source", "bridge"}
 KNOWN_CATEGORIES = {"devtools", "environment", "workflow", "hints", "ux"}
 BUNDLE_API_VERSION = "winuxsh:plugin-bundle@0.1.0"
 INDEX_SCHEMA = "winuxsh:plugin-index@0.1.0"
@@ -91,6 +92,60 @@ RELEASE_DOCUMENTS = {
         "Major releases",
     ),
 }
+FRAMEWORK_FILES = (
+    "oh-my-winuxsh.winux",
+    "lib/hooks.winux",
+    "lib/aliases.winux",
+    "lib/prompt.winux",
+    "lib/git.winux",
+    "plugins/README.md",
+    "tools/smoke_framework.winux",
+)
+EXPECTED_FRAMEWORK_PLUGINS = (
+    "prompt-core",
+    "git",
+    "common-aliases",
+    "docker",
+    "kubectl",
+    "npm",
+    "path-tools",
+    "extract",
+    "zoxide",
+    "direnv",
+    "dotenv",
+    "fzf",
+    "last-working-dir",
+    "thefuck",
+    "keybindings",
+    "command-not-found",
+    "theme-default",
+    "theme-dark",
+    "theme-light",
+    "theme-colorful",
+    "theme-minimal",
+    "theme-classic",
+    "theme-pure",
+    "theme-compact",
+    "theme-cyberpunk",
+    "theme-forest",
+    "theme-ocean",
+    "theme-agnoster",
+    "theme-avit",
+    "theme-bira",
+    "theme-clean",
+    "theme-fishy",
+    "theme-lambda",
+    "theme-p10-lean",
+    "theme-p10-classic",
+    "theme-p10-rainbow",
+    "theme-p10-pure",
+    "theme-robbyrussell",
+    "theme-dracula",
+    "theme-catppuccin-mocha",
+    "theme-gruvbox",
+    "theme-spaceship",
+    "theme-tokyonight",
+)
 
 
 def load_toml(path: Path) -> dict:
@@ -261,6 +316,19 @@ def normalize_theme_color(value: str) -> str:
     return "".join(ch for ch in value if ch not in "_-" and not ch.isspace()).lower()
 
 
+def is_theme_color(value: str) -> bool:
+    normalized = normalize_theme_color(value)
+    if normalized in THEME_COLOR_NAMES:
+        return True
+    if normalized.isdigit():
+        try:
+            return 0 <= int(normalized) <= 255
+        except ValueError:
+            return False
+    hex_value = normalized[1:] if normalized.startswith("#") else normalized
+    return len(hex_value) == 6 and all(ch in "0123456789abcdef" for ch in hex_value)
+
+
 def validate_theme_asset(pack_name: str, theme_name: str, themes_dir: Path, errors: list[str]) -> None:
     theme_path = themes_dir / f"{theme_name}.toml"
     expect(theme_path.exists(), f"{pack_name}: missing theme asset {theme_path}", errors)
@@ -277,14 +345,16 @@ def validate_theme_asset(pack_name: str, theme_name: str, themes_dir: Path, erro
         if not isinstance(style, dict):
             continue
         for key in style.keys():
-            expect(key in {"fg", "bold"}, f"{owner}.{key} is not supported", errors)
-        if "fg" in style:
-            fg = style.get("fg")
-            expect(isinstance(fg, str) and bool(fg.strip()), f"{owner}.fg must be non-empty string", errors)
-            if isinstance(fg, str) and fg.strip():
-                expect(normalize_theme_color(fg) in THEME_COLOR_NAMES, f"{owner}.fg uses unknown color {fg!r}", errors)
-        if "bold" in style:
-            expect(isinstance(style.get("bold"), bool), f"{owner}.bold must be bool", errors)
+            expect(key in {"fg", "bg", "bold", "italic", "underline", "dimmed"}, f"{owner}.{key} is not supported", errors)
+        for color_key in ("fg", "bg"):
+            if color_key in style:
+                color = style.get(color_key)
+                expect(isinstance(color, str) and bool(color.strip()), f"{owner}.{color_key} must be non-empty string", errors)
+                if isinstance(color, str) and color.strip():
+                    expect(is_theme_color(color), f"{owner}.{color_key} uses unknown color {color!r}", errors)
+        for bool_key in ("bold", "italic", "underline", "dimmed"):
+            if bool_key in style:
+                expect(isinstance(style.get(bool_key), bool), f"{owner}.{bool_key} must be bool", errors)
 
 
 def validate_semver(owner: str, value: object, errors: list[str]) -> None:
@@ -461,6 +531,92 @@ def validate_wasm_manifest(pack_name: str, manifest: dict, exports: dict, errors
     expect(bool(exports.get("commands")) or bool(exports.get("completions")) or bool(exports.get("prompt_segments")), f"{pack_name}: wasm packs must export at least one command, completion, or prompt_segment", errors)
 
 
+def validate_framework_export_list(plugin_name: str, exports: dict, key: str, errors: list[str]) -> list[str]:
+    values = exports.get(key, [])
+    expect(isinstance(values, list), f"framework plugin {plugin_name}: exports.{key} must be list", errors)
+    if not isinstance(values, list):
+        return []
+    for index, value in enumerate(values):
+        expect(valid_manifest_token(value), f"framework plugin {plugin_name}: exports.{key}[{index}] must be a non-empty single-line string", errors)
+    return [str(value) for value in values if valid_manifest_token(value)]
+
+
+def validate_framework_plugin_manifest(
+    plugin_name: str,
+    plugin_dir: Path,
+    asset_dirs: dict[str, Path],
+    errors: list[str],
+) -> None:
+    manifest_path = plugin_dir / "plugin.toml"
+    expect(manifest_path.exists(), f"framework plugin {plugin_name}: missing plugin.toml", errors)
+    if not manifest_path.exists():
+        return
+
+    manifest = safe_load_toml(manifest_path, f"framework plugin {plugin_name}", errors)
+    if manifest is None:
+        return
+
+    expect(manifest.get("name") == plugin_name, f"framework plugin {plugin_name}: name mismatch", errors)
+    validate_semver(f"framework plugin {plugin_name}: version", manifest.get("version"), errors)
+    kind = manifest.get("kind")
+    expect(kind in FRAMEWORK_PLUGIN_KINDS, f"framework plugin {plugin_name}: kind must be one of {sorted(FRAMEWORK_PLUGIN_KINDS)}", errors)
+
+    entry = manifest.get("entry")
+    expect(valid_manifest_token(entry), f"framework plugin {plugin_name}: entry must be a non-empty single-line string", errors)
+    if valid_manifest_token(entry):
+        entry_path = Path(str(entry))
+        expect(str(entry).endswith(".winux"), f"framework plugin {plugin_name}: entry must point to a .winux script", errors)
+        expect(not entry_path.is_absolute() and ".." not in entry_path.parts, f"framework plugin {plugin_name}: entry must be relative inside the plugin directory", errors)
+        expect(str(entry) == f"{plugin_name}.plugin.winux", f"framework plugin {plugin_name}: entry must follow <name>.plugin.winux", errors)
+        expect((plugin_dir / entry_path).is_file(), f"framework plugin {plugin_name}: missing entry {plugin_dir / entry_path}", errors)
+
+    summary = manifest.get("summary")
+    expect(isinstance(summary, str) and bool(summary.strip()), f"framework plugin {plugin_name}: summary must be non-empty string", errors)
+    permissions = manifest.get("permissions")
+    expect(isinstance(permissions, list), f"framework plugin {plugin_name}: permissions must be list", errors)
+    if kind == "source" and isinstance(permissions, list):
+        expect("shell:source" in permissions, f"framework plugin {plugin_name}: source plugins must declare shell:source", errors)
+    required_binaries = manifest.get("required_binaries")
+    expect(isinstance(required_binaries, list), f"framework plugin {plugin_name}: required_binaries must be list", errors)
+
+    exports = manifest.get("exports")
+    expect(isinstance(exports, dict), f"framework plugin {plugin_name}: missing [exports]", errors)
+    if not isinstance(exports, dict):
+        return
+
+    allowed_export_keys = EXPORT_KEYS | {"functions", "host_bridge"}
+    for key in exports:
+        expect(key in allowed_export_keys, f"framework plugin {plugin_name}: exports.{key} is not supported", errors)
+
+    if "aliases" in exports:
+        expect(isinstance(exports.get("aliases"), bool), f"framework plugin {plugin_name}: exports.aliases must be bool", errors)
+    if "host_bridge" in exports:
+        expect(valid_manifest_token(exports.get("host_bridge")), f"framework plugin {plugin_name}: exports.host_bridge must be a non-empty single-line string", errors)
+    if kind == "bridge":
+        expect(valid_manifest_token(exports.get("host_bridge")), f"framework plugin {plugin_name}: bridge plugins must declare exports.host_bridge", errors)
+
+    hooks = validate_framework_export_list(plugin_name, exports, "hooks", errors)
+    for hook in hooks:
+        expect(hook in SOURCE_PLUGIN_HOOKS, f"framework plugin {plugin_name}: source hook {hook!r} is not supported", errors)
+
+    for key in ("commands", "completions", "functions", "keybindings", "prompt_segments", "providers", "themes"):
+        validate_framework_export_list(plugin_name, exports, key, errors)
+
+    if exports.get("aliases"):
+        alias_path = asset_dirs["aliases"] / f"{plugin_name}.toml"
+        expect(alias_path.exists(), f"framework plugin {plugin_name}: missing aliases asset {alias_path}", errors)
+    for completion_name in validate_framework_export_list(plugin_name, exports, "completions", errors):
+        validate_completion_asset(plugin_name, completion_name, asset_dirs["completions"], errors)
+    prompt_segments = validate_framework_export_list(plugin_name, exports, "prompt_segments", errors)
+    if prompt_segments:
+        validate_prompt_assets(plugin_name, prompt_segments, asset_dirs["prompts"], errors)
+    for keybinding_name in validate_framework_export_list(plugin_name, exports, "keybindings", errors):
+        validate_keybinding_asset(plugin_name, keybinding_name, asset_dirs["keybindings"], errors)
+    for theme_name in validate_framework_export_list(plugin_name, exports, "themes", errors):
+        validate_theme_asset(plugin_name, theme_name, asset_dirs["themes"], errors)
+    for provider in validate_framework_export_list(plugin_name, exports, "providers", errors):
+        expect(provider in KNOWN_PROVIDER_EXPORTS, f"framework plugin {plugin_name}: unknown provider {provider!r}", errors)
+
 
 def validate_ci_surface(errors: list[str]) -> None:
     workflow = ROOT / ".github" / "workflows" / "bundle.yml"
@@ -476,6 +632,28 @@ def validate_ci_surface(errors: list[str]) -> None:
     )
     for fragment in required_fragments:
         expect(fragment in text, f"bundle CI workflow missing {fragment!r}", errors)
+
+
+def validate_framework_surface(asset_dirs: dict[str, Path], errors: list[str]) -> None:
+    for relative in FRAMEWORK_FILES:
+        path = ROOT / relative
+        expect(path.exists(), f"missing framework file: {path}", errors)
+        if path.exists():
+            expect(path.stat().st_size > 0, f"framework file must not be empty: {path}", errors)
+
+    plugins_dir = ROOT / "plugins"
+    expect(plugins_dir.is_dir(), f"missing framework plugins directory: {plugins_dir}", errors)
+    if not plugins_dir.is_dir():
+        return
+
+    plugin_dirs = sorted(path.name for path in plugins_dir.iterdir() if path.is_dir())
+    expect(
+        plugin_dirs == sorted(EXPECTED_FRAMEWORK_PLUGINS),
+        f"framework plugin inventory drift: expected={sorted(EXPECTED_FRAMEWORK_PLUGINS)} dirs={plugin_dirs}",
+        errors,
+    )
+    for plugin_name in plugin_dirs:
+        validate_framework_plugin_manifest(plugin_name, plugins_dir / plugin_name, asset_dirs, errors)
 
 
 def validate_authoring_surface(errors: list[str]) -> None:
@@ -621,6 +799,7 @@ def validate() -> list[str]:
 
     validate_authoring_surface(errors)
     validate_ci_surface(errors)
+    validate_framework_surface(asset_dirs, errors)
 
     manifests = {}
     for pack_name in available:
